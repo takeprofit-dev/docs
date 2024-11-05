@@ -1,0 +1,139 @@
+---
+title: SDK Installation
+description: Step-by-step guide to install the TakeProfit Widget SDK, covering prerequisites, installation commands, and initial setup. Follow this guide to ensure the SDK is correctly integrated into your project and ready for widget development on the TakeProfit platform.
+---
+
+<Steps>
+<Step title="Prerequisites">
+
+Before installing the TakeProfit Widget SDK, ensure that you meet the following requirements:
+
+- **Package Manager**: The SDK is distributed via npm, so you should have either **npm** (comes with Node.js) or **yarn** installed.
+- **Project Setup**: Ensure you have an existing project directory with a basic configuration, such as a `package.json` file. If not, you can create one with:
+
+  ```bash
+  npm init -y
+  ```
+
+</Step>
+
+<Step title="Install the SDK">
+
+The TakeProfit Widget SDK is available as an npm package. To install it, run the following command in your project directory:
+
+```bash
+npm install takeprofit-widget-sdk
+```
+
+If you prefer using `yarn`, you can install it with:
+
+```bash
+yarn add takeprofit-widget-sdk
+```
+
+This command will add the SDK as a dependency in your `package.json` file and download it to the `node_modules` directory.
+
+### Verifying Installation
+
+After installation, you should see `takeprofit-widget-sdk` listed under `"dependencies"` in your `package.json` file, like this:
+
+```json
+"dependencies": {
+  "takeprofit-widget-sdk": "^0.2.3"
+}
+```
+
+_Note_: Replace `^0.2.3` with the version number you have installed.
+
+</Step>
+
+<Step title="Initialize the SDK in Your Project">
+
+Once installed, you can begin using the SDK by importing it into your project files. Here’s a simple setup example:
+
+1. **Import the SDK**: Open the main file where you intend to initialize the SDK (e.g., `index.js`, `app.js`, or `main.ts`) and import the SDK:
+
+   ```javascript
+   import { TPWidgetSDK } from "takeprofit-widget-sdk";
+   ```
+
+2. **Basic Initialization**: To ensure the SDK is correctly initialized, call the `connect` method when your widget is ready to communicate with the platform:
+
+   ```javascript
+   TPWidgetSDK.connect();
+   ```
+
+3. **Hiding the Loader**: To let the TakeProfit platform know your widget is ready, use the `hideLoader` function after initialization:
+
+   ```javascript
+   TPWidgetSDK.hideLoader();
+   ```
+
+This confirms that the SDK is successfully integrated and your widget can begin communicating with the platform.
+
+</Step>
+
+<Step title="Verify Installation">
+
+After setting up the SDK in your project, follow these steps to verify that it’s working correctly:
+
+1. **Test Initialization**:
+
+   - Run your project (typically with `npm start` or `yarn start`).
+   - Check the browser’s developer console to ensure there are no errors related to `takeprofit-widget-sdk`.
+
+2. **Local Storage Configuration** (for local widget testing):
+
+   - Open [Take Profit Platform](https://takeprofit.com/platform) in your browser.
+   - Open your browser’s console and set up a local storage entry for your widget to test it on the TakeProfit platform interface.
+   - Run this command in the browser console:
+
+     ```javascript
+     localStorage.setItem(
+     	"takeprofit.integrations.third_party_widget_options",
+     	JSON.stringify([
+     		{
+     			iframeUrl: "<your iframe URL>",
+     			enableChannelSupport: false,
+     			title: "Test Widget",
+     			imageUrl: "<icon URL>",
+     		},
+     	])
+     );
+     ```
+
+   - Replace `<your iframe URL>` and `<icon URL>` with the actual URLs for testing.
+   - Reload the page and verify that your widget appears in the TakeProfit widget panel.
+
+</Step>
+</Steps>
+
+## Common Issues & Troubleshooting
+
+Here are some common issues you may encounter during installation, along with solutions:
+
+<AccordionGroup>
+	<Accordion
+		icon="rectangle-terminal"
+		title="Cannot find module 'takeprofit-widget-sdk'"
+	>
+		Ensure you’ve installed the SDK in the correct directory. Run `npm install`
+		again to confirm all dependencies are correctly installed.
+	</Accordion>
+	<Accordion
+		icon="rectangle-terminal"
+		title="Error: Version compatibility with Node.js"
+	>
+		The SDK requires Node.js version 12 or later. Check your Node.js version
+		with `node -v`. Update if necessary.
+	</Accordion>
+	<Accordion
+		icon="loader"
+		title="Widget Doesn’t Load in TakeProfit Platform"
+	>
+		Ensure that your `iframeUrl` in the local storage configuration points to a
+		live or local server. - Clear the browser cache and try reloading the page.
+	</Accordion>
+</AccordionGroup>
+
+By following this guide, you should now have the TakeProfit Widget SDK installed and ready for further customization and development.

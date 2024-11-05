@@ -1,0 +1,147 @@
+# Fills
+
+Area in between any two plots can be filled with a color (often semi-transparent). To use this feature there is a
+[`@fill`](Library-reference#decor_fill) decorator and a [`Fill`](Library-reference#class_Fill) class.
+
+In the first place the `@fill` decorator declares which two plots should be used for filling. Optionally
+it may have a color argument, which should be used if a single-colored fill is desired.
+
+## Single-colored fill
+
+The simplest possible usecase fills the space between two plot lines:
+
+```py
+# indie:lang_version = 4
+from indie import indicator, color, plot, fill, Fill
+
+@indicator('Example 1', overlay_main_pane=True)
+@plot('p1')
+@plot('p2')
+@fill('p1', 'p2', color=color.BLUE(0.2))
+def Main(self):
+    a = self.high
+    b = self.low
+    return a[0], b[0], Fill()
+```
+
+![Figure 8.1. Single-colored fill.](/images/indie/Fills/figure-1.png)
+
+Please note, that both `@fill` decorator and `Fill` object always must be used together. Even in simple cases of a
+single-colored fills where `Fill` object is constructed with all default values (i.e. with no arguments `Fill()`).
+
+## Multicolored fill
+
+If a multicolored fill is needed, then the color value should be calculated in the `Main` function code and passed as
+argument to a `Fill` object returned by the `Main` function.
+
+```py
+# indie:lang_version = 4
+from indie import indicator, color, plot, fill, Fill
+
+@indicator('Example 2', overlay_main_pane=True)
+@plot('p1')
+@plot('p2')
+@fill('p1', 'p2')
+def Main(self):
+    c = color.GREEN(0.5) if self.close[0] > self.open[0] else color.RED(0.5)
+    return self.high[0], self.low[0], Fill(color=c)  # NOTE: This color will override color in @fill decorator if any
+```
+
+![Figure 8.2. Multi-colored fill.](/images/indie/Fills/figure-2.png)
+
+## Multicolored fill with an offset
+
+`Fill()` has an optional parameter `offset: int`. It may be used to shift the coloring to the left (if `offset` is
+negative) or to the right (if `offset` is positive):
+
+```py
+# indie:lang_version = 4
+from indie import indicator, color, plot, fill, Fill, param
+
+@indicator('Example 3', overlay_main_pane=True)
+@plot('p1')
+@plot('p2')
+@fill('p1', 'p2')
+@param.int('fill_offset', default=2)
+def Main(self, fill_offset):
+    c = color.GREEN(0.5) if self.close[0] > self.open[0] else color.RED(0.5)
+    return self.high[0], self.low[0], Fill(color=c, offset=fill_offset)
+```
+
+Please note, that a non-zero fill `offset` has effect only to multi-colored fills and has none to single-colored ones.
+
+# Levels
+
+[`@level()`](Library-reference#decor_level) decorator creates a level (horizontal line).
+
+```txt
+@level(
+  value: float,
+  title: indie.Optional[str] = None,
+  line_color: indie.Color = indie.color.GRAY(0.5),
+  line_style: int = indie.line_style.DASHED,
+  line_width: int = 1
+) -> NoneType
+```
+
+Parameters:
+
+- `value` — Value of the level on a vertical scale of an indicator.
+- `title` — Human readable title which is visible in the indicator's Settings panel.
+- `line_color` — Color of the line.
+- `line_style` — Style of the line. It is represented as enum value of type `line_style`.
+- `line_width` — Width of the line.
+
+Example:
+
+```py
+# indie:lang_version = 4
+from indie import indicator, level, color
+
+@indicator('Level example')
+@level(150, line_color=color.RED, line_width=4)
+def Main(self):
+    return self.close[0]
+```
+
+![Figure 8.3. Example of an indicator with @level.](/images/indie/Standard-library/level_example.png)
+
+# Bands
+
+[`@band()`](Library-reference#decor_band) decorator creates a band (two horizontal lines usually with a semi-transparent fill in between them).
+
+```txt
+@band(
+  value1: float,
+  value2: float,
+  title: indie.Optional[str] = None,
+  fill_color: indie.Color = indie.color.GREEN(0.05),
+  line_color: indie.Color = indie.color.GRAY(0.5),
+  line_style: int = indie.line_style.DASHED,
+  line_width: int = 1
+) -> NoneType
+```
+
+Parameters:
+
+- `value1` — Value of the first horizontal line of a band on a vertical scale of an indicator.
+- `value2` — Value of the second horizontal line of a band on a vertical scale of an indicator.
+- `title` — Human readable title which is visible in the indicator's Settings panel.
+- `fill_color` — Color of the background.
+- `line_color` — Color of the line.
+- `line_style` — Style of the line. It is represented as enum value of type `line_style`.
+- `line_width` — Width of the line.
+
+Example:
+
+```py
+# indie:lang_version = 4
+from indie import indicator, band, color
+
+@indicator('Band example')
+@band(145, 155, line_color=color.RED, line_width=4)
+def Main(self):
+    return self.close[0]
+```
+
+![Figure 8.4. Example of an indicator with @band.](/images/indie/Standard-library/band_example.png)

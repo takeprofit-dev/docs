@@ -1,0 +1,126 @@
+This section is an overview of core data types of the Indie language.
+
+# Basic data types
+
+They are:
+
+- `float` — type of double precision (64-bit) floating point numbers
+- `int` — integer numbers
+- `bool` — boolean values `True` or `False`
+- `str` — string data type
+
+# `indie.Optional[T]` class
+
+In Indie (unlike in Python) it is not allowed to assign `None` value to a variable of any arbitrary type (e.g. basic
+data types). But it is allowed to do so with the help of `indie.Optional[T]` class.
+
+`indie.Optional[T]` is similar to Python's `typing.Optional[T]` with a few significant differences:
+
+- `None` can be assigned to values which have `indie.Optional[T]` type only. `None` cannot be assigned to values of some
+  `T` type which is not an optional type
+- to write some value to an optional variable just simple assignment operator should be used
+- to access `T` value which is stored in `indie.Optional[T]` it is required to explicitly call `value()` or `value_or()` method
+- if `value()` method is called on an optional variable which is `None` it raises runtime error
+- to test if optional variable has some value stored inside `is None` and `is not None` constructs should be used
+- if variable was declared as `indie.Optional[T]` then `T` cannot be changed for that variable to some other type `U`
+
+For example this will not work in Indie:
+
+```py
+a = None  # compilation error
+# ...
+a = 42
+```
+
+Indie compiler cannot infer `T` type for `a` in this example. Yes, it may guess that `a` is of `indie.Optional` type,
+but it is unclear how to guess that `T` will be an `int` for it.
+
+This will not work too:
+
+```py
+a: int = None  # compilation error
+# ...
+a = 42
+```
+
+In this case, well, it is explicitly declared that `a` is not an optional type, so `None` cannot be assigned to it.
+
+That is why type of `a` must be declared explicitly as an optional type:
+
+```py
+a: indie.Optional[int] = None
+a = 42
+# ...
+a = 'foobar'  # compilation error
+```
+
+Once variable `a` was declared as optional of `int` value, it cannot at some point start to store `str` values.
+
+By the way if you do not assign any value to an optional variable it will be `None` too:
+
+```py
+a: indie.Optional[int] = None
+b: indie.Optional[int]
+```
+
+Both `a ` and `b` in this example are `None`.
+
+To check if optional variable `a` is `None` or not we use:
+
+```py
+if a is None:
+    # ...
+if a is not None:
+    # ...
+```
+
+To access value stored in optional variable `a`, the `value()` method should be explicitly called:
+
+```py
+if a is not None:
+    b = a.value()
+```
+
+If an optional variable has no value stored inside then `value()` method call raises a runtime error. For example:
+
+```py
+s: indie.Optional[str]
+t = s.value()  # runtime error, because `s is None == True`
+```
+
+But this works fine:
+
+```py
+s: indie.Optional[str] = 'foobar'
+t = s.value()
+```
+
+because in this case string `'foobar'` is stored in optional variable `s`.
+
+# Built-in container types
+
+At the moment (Indie v4) only `list[T]` is implemented in the Indie language. There are partial support of a `tuple[T]`.
+It is planned to add support for `dict[K, V]` and `set[T]` in the near future.
+
+# Series data types
+
+- `indie.Series[T]` and an alias `indie.SeriesF` for `indie.Series[float]`
+- `indie.MutSeries[T]` and an alias `indie.MutSeriesF` for `indie.MutSeries[float]`
+
+`Series[T]` is a read-only container which stores series of `T` values. `MutSeries[T]` extends `Series[T]` with only
+`__setitem__` method, which allows writing to the last element of the container (which syntactically looks like
+`some_mut_series[0] = some_value`).
+
+Type `T` can be (almost) any type in Indie, not just `float`, but also `int`, `bool`, `str`, etc.
+
+# Context data types
+
+There are three context classes:
+
+- `indie.Context` is a base class that represents a context of a chart instrument
+- `indie.MainContext` is a class that represents main context, extends `indie.Context`
+- `indie.SecContext` is a class that represents secondary context, extends `indie.Context`
+
+# Algorithm base class
+
+There is a `indie.Algorithm` base class. All algorithms from `indie.algorithms` package are inherited from it.

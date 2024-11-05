@@ -1,0 +1,95 @@
+---
+title: Introduction
+description: The TakeProfit Widget SDK is a tool designed to help developers create and integrate interactive, data-driven widgets directly into the TakeProfit platform. Widgets embedded with this SDK can communicate with the platform, exchange data, and offer seamless, customized experiences for users.
+---
+
+The SDK supports key interactions like state management, security updates, and platform event handling, allowing developers to build fully interactive and responsive widgets.
+
+---
+
+## Core Features
+
+The TakeProfit Widget SDK provides the following core features to enhance widget functionality:
+
+<CardGroup cols={2}>
+	<Card
+		title="Widget Lifecycle Management"
+		icon="square-1"
+	>
+		Handle widget initialization, loading states, and lifecycle events to create
+		a seamless user experience.
+	</Card>
+	<Card
+		title="Data Synchronization"
+		icon="square-2"
+	>
+		Sync widget data with platform data, including real-time updates to security
+		information and channel states.
+	</Card>
+	<Card
+		title="Platform Communication"
+		icon="square-3"
+	>
+		Enable two-way communication between your widget and the platform,
+		supporting a wide range of platform messages and state updates.
+	</Card>
+	<Card
+		title="Customization and Configuration"
+		icon="square-4"
+	>
+		Easily configure widget settings, add menu items, manage permissions, and
+		handle user interactions directly within the widget.
+	</Card>
+</CardGroup>
+
+---
+
+## Key Components
+
+The SDK includes several key components that serve as the building blocks for widget integration:
+
+- **TPWidgetSDK**: The primary object for interacting with the platform. It includes methods for initializing, connecting, and managing widget states.
+
+- **Interfaces and Types**: The SDK provides a comprehensive set of interfaces, such as `Channel`, `Security`, which define the structure of data used within the platform and ensure type safety.
+
+- **Messaging System**: The SDK’s messaging system allows widgets to send and receive messages for updating states, changing securities, managing menus, and other interactive functionalities.
+
+---
+
+## How the SDK Works
+
+The TakeProfit Widget SDK works by embedding widgets within the TakeProfit platform via an iframe.
+
+Widgets can:
+
+- **Subscribe to Updates**: Track platform data like security changes and channel updates.
+- **Send Requests**: Request state changes (e.g., switch securities or update widget settings).
+- **Receive Events**: Handle platform events and user interactions to provide a cohesive experience.
+
+### Example Use Cases
+
+1. **Custom Security Data**: Create a widget that displays real-time stock data, allowing users to switch between different securities.
+2. **Interactive Dashboards**: Build an interactive widget that synchronizes with the platform’s channels, updating based on user selections.
+3. **Menu Management**: Add custom menu items to the widget for easy access to specific actions or settings.
+
+---
+
+## Getting Started
+
+To start developing with the SDK, follow these basic steps:
+
+1. **Install the SDK**: Refer to the [Installation Guide](/sdk/installation) to set up the SDK within your project.
+2. **Initialize the Widget**: Set up the `TPWidgetSDK` in your project and ensure the widget is ready for interaction.
+3. **Explore the API**: Dive into the SDK’s API documentation to learn about available methods, messages, and configuration options.
+
+---
+
+## Next Steps
+
+After familiarizing yourself with this introduction, continue with the following resources to deepen your understanding and start developing your widget:
+
+- [Installation Guide](/sdk/installation): Instructions for installing and setting up the SDK in your project.
+- [Creating Your First Widget](/sdk/first-widget): Step-by-step guide for initializing and configuring your first widget.
+- [SDK Reference](/api-reference): Comprehensive details on available classes, interfaces, and messaging protocols.
+
+By following this documentation, you’ll gain a solid foundation for creating and integrating widgets with the TakeProfit platform, allowing you to deliver customized, data-rich experiences for end-users.

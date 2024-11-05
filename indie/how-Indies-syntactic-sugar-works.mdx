@@ -1,0 +1,263 @@
+Indie programming language has several [_syntactic sugar_](https://en.wikipedia.org/wiki/Syntactic_sugar) constructs
+which simplify a lot writing code of technical analysis indicators for TakeProfit platform.
+
+# `Main` entry point
+
+Every indicator in Indie has a `Main` entry point. It could be written in one of two forms: as a `Main` _function
+definition_ which is a form of syntactic sugar or as a `Main` _class definition_ (which is not).
+
+## `Main` function definition
+
+Here is an example of minimal indicator written in a form of a `Main` as a function definition:
+
+```py
+# indie:lang_version = 4
+from indie import indicator
+
+@indicator('Example')
+def Main(self):
+    return self.close[0]
+```
+
+This form is very compact therefore it is recommended for simple indicators.
+
+When Indie compiler sees a combination of a function definition with name `Main` decorated with `@indicator` it transforms it into a `Main` class definition (i.e. to the second form) according to a few simple rules:
+
+- function definition is replaced with a `Main` class definition which is inherited from `indie.MainContext` base class;
+- the body of `Main` function becomes `Main.calc()` method;
+- `Main` class may optionally have `__init__` constructor (only if it is needed).
+
+This transformation is automatic and hidden from user, that is why the first form of `Main` entry point is considered to
+be a syntactic sugar. In some cases when indicator needs greater control over what is happening in the code the second form of writing the indicator's `Main` entry point with classes syntax can be used explicitly.
+
+## `Main` written as a class definition
+
+Indicator could be written using the second form of a `Main` entry point which uses class definition syntax:
+
+```py
+# indie:lang_version = 4
+from indie import indicator, MainContext
+
+@indicator('Example')
+class Main(MainContext):
+    def __init__(self):
+        pass
+
+    def calc(self):
+        return self.close[0]
+```
+
+Writing indicator in the second form using class syntax is less compact but it has it's advantages, for example user is
+able to declare `__init__` constructor method and place some one-time initialization code there. Therefore for
+indicators with complex logic you probably would like to use the second form. Constructor `__init__` is optional though.
+
+# Functions decorated with `@algorithm`
+
+Functions decorated with `@algorithm` are automatically transformed by Indie compiler into classes inherited from
+`indie.Algorithm`. For example:
+
+```py
+# indie:lang_version = 4
+from indie import algorithm, SeriesF
+from indie.algorithms import Ema
+
+@algorithm
+def DoubleEma(self, src: SeriesF, length: int) -> SeriesF:
+    ema1 = Ema.new(src, length)
+    ema2 = Ema.new(ema1, length)
+    return ema2
+```
+
+Will be transformed into a class form:
+
+```py
+# indie:lang_version = 4
+from indie import Algorithm, SeriesF, Context
+from indie.algorithms import Ema
+
+class DoubleEma(Algorithm):
+    def __init__(self, ctx: Context):
+        super().__init__(ctx)
+
+    def calc(self, src: SeriesF, length: int) -> SeriesF:
+        ema1 = Ema.new(src, length)
+        ema2 = Ema.new(ema1, length)
+        return ema2
+```
+
+Users are able to choose which form they want to use in their indicators' code. Of course, as with `Main` entry point,
+the decorator-based form is preferred in most cases. Class form should be used only in more complex cases, where a
+more fine-grained control is needed.
+
+Decorator `@algorithm` is also a syntactic sugar in Indie language. Here are the simple rules that Indie compiler uses
+to process it:
+
+- function definition decorated with `@algorithm` is replaced with a class with the same name inherited from
+  `indie.Algorithm` base class;
+- original function becomes a `calc` method of this class, function body does not change;
+- `__init__` constructor is added to the generated class which accepts `ctx: indie.Context` parameter and forwards it to
+  the parent constructor;
+
+NOTE: to get OHLCV values of the current instrument from the algorithm methods there is a `self.ctx` property of
+`indie.Context` type. For example to get access to close prices use `self.ctx.close` expression.
+
+The `DoubleEma` algorithm from the example above could be created and used in two ways:
+
+- Using `DoubleEma.new()` static method (`new` is a method of parent class `indie.Algorithm`, well... not exactly but
+  kind of). This is a syntactic sugar that allows to use any algorithm right in the place where it is needed in the
+  indicator (e.g. in `def Main` function, or in the function body of some other algorithm).
+- Using `DoubleEma()` constructor in `__init__` method of a corresponding `MainContext`, `SecContext` or other
+  `Algorithm`. Then, in the `calc` method of a corresponding `MainContext`, `SecContext` or other
+  `Algorithm` you should explicitly call the `DoubleEma`'s `calc()` method.
+
+# `Algorithm.new()` method
+
+Method `Algorithm.new()` is used to create and use algorithm objects in Indie. It looks like a static method, but
+it behaves very differently because it is also a syntactic sugar of the language. When Indie compiler sees a call, e.g.
+`res = Ema.new(src, length)`, it uses the following rules to transform such a piece of code:
+
+- a class field is created in corresponding `__init__` constructor of the enclosing `MainContext`, `SecContext` or other
+  `Algorithm`. In our example it would be: `self._ema1 = Ema(ctx)` (in case `self` is a `Context`) or
+  `self._ema1 = Ema(self.ctx)` (in case `self` is an `Algorithm`).
+- the call of `Ema.new` is replaced with `self._ema1.calc` call. In our example it would be
+  `res = self._ema1.calc(src, length)`.
+
+Here is a full example of such transformation:
+
+```py
+# indie:lang_version = 4
+from indie import Algorithm, SeriesF, Context
+from indie.algorithms import Ema
+
+class DoubleEma(Algorithm):
+    def __init__(self, ctx: Context):
+        super().__init__(ctx)
+
+    def calc(self, src: SeriesF, length: int) -> SeriesF:
+        ema1 = Ema.new(src, length)
+        ema2 = Ema.new(ema1, length)
+        return ema2
+```
+
+Will be transformed into:
+
+```py
+# indie:lang_version = 4
+from indie import Algorithm, SeriesF, Context
+from indie.algorithms import Ema
+
+class DoubleEma(Algorithm):
+    def __init__(self, ctx: Context):
+        super().__init__(ctx)
+        self._ema1 = Ema(self.ctx)
+        self._ema2 = Ema(self.ctx)
+
+    def calc(self, src: SeriesF, length: int) -> SeriesF:
+        ema1 = self._ema1.calc(src, length)
+        ema2 = self._ema2.calc(ema1, length)
+        return ema2
+```
+
+Of course, syntactic sugar of `Algorithm.new()` works only inside methods of descendants of `MainContext`, `SecContext`
+or other `Algorithm` classes (except the `__init__` constructors). You cannot use this functionality in plain
+Python-like functions.
+
+Syntactic sugar of `Algorithm.new()` method can be used with any Indie algorithm regardless of the form in which the
+algorithm was written (the decorator-based form or the class-based form).
+
+# `MutSeries[T].new()` method
+
+Method `MutSeries[T].new()` (or `MutSeriesF.new()` where `MutSeriesF` is an alias for `MutSeries[float]`) is used to create and use mutable series objects in Indie. It looks like a static method, but
+it behaves very differently because it is also a syntactic sugar of the language. When Indie compiler sees a call, e.g.
+`s = MutSeriesF.new((a + b) / 2)`, it uses the following rules to transform such a piece of code:
+
+- a class field is created in corresponding `__init__` constructor of the enclosing `MainContext`, `SecContext` or
+  `Algorithm`. In our example it would be: `self._ms1 = self.new_mut_series_f()` (in case `self` is a `Context`) or `self.ctx.new_mut_series_f()` (in case `self` is an `Algorithm`).
+- the call of `MutSeriesF.new` is replaced with `self._ms1.calc` call. In our example it would be
+  `s = self._ms1.calc((a + b) / 2)`. Method `MutSeriesF.calc` writes given expression `(a  + b) / 2` into the last
+  element of the mutable series object and returns a reference to the mutable series itself.
+
+For example:
+
+```py
+# indie:lang_version = 4
+from indie import algorithm, SeriesF, MutSeriesF
+
+@algorithm
+def Hl2(self) -> SeriesF:
+    h = self.ctx.high
+    l = self.ctx.low
+    return MutSeriesF.new((h[0] + l[0]) / 2)
+```
+
+transforms into:
+
+```py
+# indie:lang_version = 4
+from indie import Algorithm, SeriesF, MutSeriesF, Context
+
+class Hl2(Algorithm):
+    def __init__(self, ctx: Context):
+        super().__init__(ctx)
+        self._ms1 = self.ctx.new_mut_series_f()
+
+    def calc(self) -> SeriesF:
+        h = self.ctx.high
+        l = self.ctx.low
+        return self._ms1.calc((h[0] + l[0]) / 2)
+```
+
+In this example two transformations took place at once: syntactic sugar of `@algorithm` and `MutSeriesF.new()` call.
+
+# Functions decorated with `@sec_context`
+
+Functions decorated with `@sec_context` are used to create secondary entry-points (besides `Main`) which are needed when
+indicator requests data of additional instruments. And decorator `@sec_context` is syntactic sugar, because every time
+Indie compiler sees a function definition decorated with `@sec_context` it transforms it into a class, inherited from
+`indie.SecContext` according to a few simple rules:
+
+- function definition decorated with `@sec_context` is replaced with a class with the same name inherited from
+  `indie.SecContext` base class;
+- the body of the function becomes a `calc()` method of the generated class;
+- generated class may optionally have `__init__` constructor (only if it is needed).
+
+Let us see how it works with an example, this piece of code:
+
+```py
+# indie:lang_version = 4
+from indie import sec_context
+
+@sec_context
+def SecHighLow(self):
+    return self.high[0], self.low[0]
+```
+
+transforms into this:
+
+```py
+# indie:lang_version = 4
+from indie import SecContext
+
+class SecHighLow(SecContext):
+    def calc(self):
+        return self.high[0], self.low[0]
+```
+
+The code that actually uses the `SecHighLow` looks like this:
+
+```py
+# indie:lang_version = 4
+from indie import indicator, tf
+
+# >>> definition of SecHighLow is here <<<
+
+@indicator('MyIndie')
+class Main(MainContext):
+    def __init__(self):
+        self._h, self._l = self.calc_on(SecHighLow, time_frame=tf('1D'))
+
+    def calc(self):
+        return self._h[0], self._l[0]
+```
+
+NOTE that in the Indie (since version 4) it is allowed to call `Context.calc_on` only from `__init__` constructors.

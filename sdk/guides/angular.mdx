@@ -1,0 +1,882 @@
+---
+title: Angular
+description: This guide provides a comprehensive, step-by-step process to create your first custom widget using **Angular** and the **TakeProfit Widget SDK** (version **0.2.3**). By following this guide, you'll set up an Angular project, integrate the SDK, configure necessary security headers, and implement basic functionalities to interact with the TakeProfit platform. This example serves as a foundation for building more complex and feature-rich widgets tailored to your specific needs.
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following:
+
+- **Node.js**: Version 14 or higher. Download from [Node.js Official Website](https://nodejs.org/).
+- **npm** or **Yarn**: Package managers that come with Node.js.
+- **Angular CLI**: Install globally using `npm install -g @angular/cli`.
+- **Code Editor**: Such as [Visual Studio Code](https://code.visualstudio.com/).
+- **Basic Knowledge**: Familiarity with **JavaScript**, **TypeScript**, and **Angular**.
+- **Access to TakeProfit Platform**: For widget integration and testing.
+
+---
+
+## Set Up Your Angular Project
+
+1. **Create a New Angular App**
+
+   Use **Angular CLI** to bootstrap a new Angular project. Open your terminal and run:
+
+   ```bash
+   ng new my-tp-widget
+   cd my-tp-widget
+   ```
+
+   Follow the prompts to set up your project. For this guide, it's recommended to select the following options:
+
+   - **Would you like to add Angular routing?** `Yes`
+   - **Which stylesheet format would you like to use?** `CSS` (or your preferred choice)
+
+2. **Start the Development Server**
+
+   Verify that your Angular app is set up correctly by starting the development server:
+
+   ```bash
+   ng serve
+   ```
+
+   This will run your app at `http://localhost:4200/`.
+
+---
+
+## Install the TakeProfit Widget SDK
+
+1. **Install the SDK**
+
+   Integrate the TakeProfit Widget SDK into your Angular project by installing it via **npm** or **Yarn**:
+
+   ```bash
+   npm install takeprofit-widget-sdk@0.2.3
+   ```
+
+   Or with Yarn:
+
+   ```bash
+   yarn add takeprofit-widget-sdk@0.2.3
+   ```
+
+2. **Verify Installation**
+
+   Check your `package.json` to ensure `takeprofit-widget-sdk` is listed under `dependencies`:
+
+   ```json
+   "dependencies": {
+     "takeprofit-widget-sdk": "^0.2.3",
+     // other dependencies...
+   }
+   ```
+
+---
+
+## Configure Security Headers
+
+To ensure that your widget can be embedded securely within the TakeProfit platform, you need to configure specific HTTP headers. Since Angular applications are typically served using static servers, you'll need to set up a simple Express server to serve your widget with the necessary headers.
+
+1. **Install Express and CORS**
+
+   Install **Express** and **CORS** to create a server that can set custom headers:
+
+   ```bash
+   npm install express cors
+   ```
+
+2. **Create the Server File**
+
+   Create a new file named `server.js` in the root of your project:
+
+   ```bash
+   touch server.js
+   ```
+
+   Open `server.js` and add the following code:
+
+   ```javascript
+   // server.js
+
+   const express = require("express");
+   const path = require("path");
+   const cors = require("cors");
+
+   const app = express();
+   const PORT = process.env.PORT || 8080;
+
+   // Middleware to set security headers
+   app.use(
+   	cors({
+   		origin: "https://takeprofit.com",
+   	})
+   );
+
+   app.use((req, res, next) => {
+   	res.setHeader("X-Frame-Options", "ALLOW-FROM https://takeprofit.com");
+   	res.setHeader(
+   		"Content-Security-Policy",
+   		"frame-ancestors 'self' https://takeprofit.com"
+   	);
+   	next();
+   });
+
+   // Serve static files from the Angular app
+   app.use(express.static(path.join(__dirname, "dist/my-tp-widget")));
+
+   // For all GET requests, send back index.html so that PathLocationStrategy can be used
+   app.get("/*", (req, res) => {
+   	res.sendFile(path.join(__dirname, "dist/my-tp-widget/index.html"));
+   });
+
+   app.listen(PORT, () => {
+   	console.log(`Server is running on port ${PORT}`);
+   });
+   ```
+
+   **Explanation:**
+
+   - **CORS Middleware**: Allows requests only from `https://takeprofit.com`.
+   - **Security Headers**: Sets `X-Frame-Options` and `Content-Security-Policy` to allow embedding only from `https://takeprofit.com`.
+   - **Static Files**: Serves the Angular app from the `dist/my-tp-widget` directory.
+   - **Fallback to `index.html`**: Ensures that Angular's routing works correctly.
+
+3. **Build the Angular App**
+
+   Before running the server, build your Angular application:
+
+   ```bash
+   ng build --prod
+   ```
+
+   This will generate the production build in the `dist/my-tp-widget` directory.
+
+---
+
+## Initialize the SDK in Your Project
+
+1. **Create an SDK Initialization Service**
+
+   Generate a new service to handle SDK initialization and cleanup:
+
+   ```bash
+   ng generate service services/tp-widget-sdk
+   ```
+
+   This will create `tp-widget-sdk.service.ts` in the `src/app/services` directory.
+
+2. **Implement the Service**
+
+   Open `src/app/services/tp-widget-sdk.service.ts` and add the following code:
+
+   ```typescript
+   // src/app/services/tp-widget-sdk.service.ts
+
+   import { Injectable } from "@angular/core";
+   import { TPWidgetSDK } from "takeprofit-widget-sdk";
+
+   @Injectable({
+   	providedIn: "root",
+   })
+   export class TpWidgetSdkService {
+   	constructor() {}
+
+   	initializeSDK(): void {
+   		TPWidgetSDK.connect();
+   		TPWidgetSDK.hideLoader();
+   	}
+
+   	cleanupSDK(): void {
+   		TPWidgetSDK.disconnect();
+   	}
+
+   	subscribeWidgetChange(
+   		callback: (newState: WidgetStateInfo | null) => void
+   	): void {
+   		TPWidgetSDK.subscribeWidgetChange(callback);
+   	}
+
+   	unsubscribeWidgetChange(
+   		callback: (newState: WidgetStateInfo | null) => void
+   	): void {
+   		TPWidgetSDK.unsubscribeWidgetChange(callback);
+   	}
+
+   	subscribeChannelChange(
+   		callback: (newChannel: Channel | null) => void
+   	): void {
+   		TPWidgetSDK.subscribeChannelChange(callback);
+   	}
+
+   	unsubscribeChannelChange(
+   		callback: (newChannel: Channel | null) => void
+   	): void {
+   		TPWidgetSDK.unsubscribeChannelChange(callback);
+   	}
+
+   	requestChangeSecurity(
+   		securityID: SecurityID,
+   		callback: (result: { payload: ResultPayload }) => void
+   	): void {
+   		TPWidgetSDK.requestChangeSecurity(securityID, callback);
+   	}
+
+   	async addMenuItem(
+   		label: string,
+   		action: () => void,
+   		isPermanent: boolean
+   	): Promise<number> {
+   		return await TPWidgetSDK.addMenuItem(label, action, isPermanent);
+   	}
+
+   	async updateMenuItem(
+   		menuItemId: number,
+   		isPermanent: boolean,
+   		label: string
+   	): Promise<boolean> {
+   		return await TPWidgetSDK.updateMenuItem(menuItemId, isPermanent, label);
+   	}
+
+   	async removeMenuItem(menuItemId: number): Promise<boolean> {
+   		return await TPWidgetSDK.removeMenuItem(menuItemId);
+   	}
+   }
+
+   // Define necessary interfaces
+   export type SecurityID = `${string};${string}`;
+
+   export interface WidgetStateInfo {
+   	widgetID: string;
+   	channelID: string | null;
+   	active: boolean;
+   	fullscreen: boolean;
+   }
+
+   export interface Channel {
+   	ID: string;
+   	securityID: SecurityID | null;
+   	security: Security | null;
+   }
+
+   export interface Security {
+   	ID: SecurityID;
+   	ticker: string;
+   	precision: number;
+   	name: string;
+   	exchangeCode?: string;
+   	iconURL?: string;
+   	iconBase64?: string;
+   	iconBackgroundColor?: string;
+   	className?: string;
+   	classNameTopLevel?: string;
+   	companyName?: string;
+   	countryCode?: string;
+   	exchangeAlias?: string;
+   	industryName?: string;
+   }
+
+   export interface ResultPayload {
+   	isSuccessful: boolean;
+   	error?: string;
+   }
+   ```
+
+   **Explanation:**
+
+   - **`TpWidgetSdkService`**: Provides methods to initialize, cleanup, and interact with the TakeProfit Widget SDK.
+   - **Type Definitions**: Defines necessary TypeScript interfaces for type safety.
+
+3. **Provide the Service Globally**
+
+   The service is already provided in the root injector via the `@Injectable` decorator, so no additional configuration is needed.
+
+---
+
+## Create Your First Widget Component
+
+1. **Generate a New Component**
+
+   Create a new component for your widget:
+
+   ```bash
+   ng generate component components/widget
+   ```
+
+   This will create `widget.component.ts`, `widget.component.html`, and related files in the `src/app/components/widget` directory.
+
+2. **Implement the Widget Component**
+
+   Open `src/app/components/widget/widget.component.ts` and add the following code:
+
+   ```typescript
+   // src/app/components/widget/widget.component.ts
+
+   import { Component, OnInit, OnDestroy } from "@angular/core";
+   import {
+   	TpWidgetSdkService,
+   	WidgetStateInfo,
+   	Channel,
+   	SecurityID,
+   	ResultPayload,
+   } from "../../services/tp-widget-sdk.service";
+
+   @Component({
+   	selector: "app-widget",
+   	templateUrl: "./widget.component.html",
+   	styleUrls: ["./widget.component.css"],
+   })
+   export class WidgetComponent implements OnInit, OnDestroy {
+   	menuItemId: number | null = null;
+
+   	constructor(private tpWidgetSdk: TpWidgetSdkService) {}
+
+   	ngOnInit(): void {
+   		// Initialize the SDK
+   		this.tpWidgetSdk.initializeSDK();
+
+   		// Subscribe to widget state changes
+   		this.tpWidgetSdk.subscribeWidgetChange(
+   			this.handleWidgetChange.bind(this)
+   		);
+
+   		// Subscribe to channel state changes
+   		this.tpWidgetSdk.subscribeChannelChange(
+   			this.handleChannelChange.bind(this)
+   		);
+   	}
+
+   	ngOnDestroy(): void {
+   		// Unsubscribe from widget and channel changes
+   		this.tpWidgetSdk.unsubscribeWidgetChange(
+   			this.handleWidgetChange.bind(this)
+   		);
+   		this.tpWidgetSdk.unsubscribeChannelChange(
+   			this.handleChannelChange.bind(this)
+   		);
+
+   		// Cleanup the SDK
+   		this.tpWidgetSdk.cleanupSDK();
+   	}
+
+   	handleWidgetChange(newState: WidgetStateInfo | null): void {
+   		console.log("Widget state updated:", newState);
+   	}
+
+   	handleChannelChange(newChannel: Channel | null): void {
+   		console.log("Channel state updated:", newChannel);
+   	}
+
+   	changeSecurity(securityID: SecurityID): void {
+   		this.tpWidgetSdk.requestChangeSecurity(securityID, (result) => {
+   			if (result.payload.isSuccessful) {
+   				console.log(`Security successfully changed to ${securityID}.`);
+   			} else {
+   				console.error(`Failed to change security: ${result.payload.error}`);
+   			}
+   		});
+   	}
+
+   	async addMenuItem(): Promise<void> {
+   		try {
+   			const id = await this.tpWidgetSdk.addMenuItem(
+   				"Refresh Data",
+   				() => {
+   					console.log("Refresh Data menu item clicked.");
+   					// Implement refresh logic here
+   				},
+   				false
+   			);
+   			this.menuItemId = id;
+   			console.log(`Menu item added with ID: ${id}`);
+   		} catch (error) {
+   			console.error("Failed to add menu item:", error);
+   		}
+   	}
+
+   	async updateMenuItem(): Promise<void> {
+   		if (!this.menuItemId) return;
+   		try {
+   			const success = await this.tpWidgetSdk.updateMenuItem(
+   				this.menuItemId,
+   				false,
+   				"Refresh Data (Updated)"
+   			);
+   			if (success) {
+   				console.log("Menu item updated successfully.");
+   			}
+   		} catch (error) {
+   			console.error("Failed to update menu item:", error);
+   		}
+   	}
+
+   	async removeMenuItem(): Promise<void> {
+   		if (!this.menuItemId) return;
+   		try {
+   			const success = await this.tpWidgetSdk.removeMenuItem(this.menuItemId);
+   			if (success) {
+   				console.log("Menu item removed successfully.");
+   				this.menuItemId = null;
+   			}
+   		} catch (error) {
+   			console.error("Failed to remove menu item:", error);
+   		}
+   	}
+   }
+   ```
+
+   **Important Corrections:**
+
+   - **Conditional Checks**: Updated `if (result.isSuccessful)` to `if (result.payload.isSuccessful)` to correctly access the `isSuccessful` property within the `payload`.
+   - **Error Messages**: Updated `${result.error}` to `${result.payload.error}` to correctly access the `error` message within the `payload`.
+
+   **Explanation:**
+
+   - **Lifecycle Hooks**:
+     - `ngOnInit`: Initializes the SDK and subscribes to widget and channel state changes.
+     - `ngOnDestroy`: Unsubscribes from state changes and cleans up the SDK.
+   - **Methods**:
+     - `handleWidgetChange`: Logs widget state updates.
+     - `handleChannelChange`: Logs channel state updates.
+     - `changeSecurity`: Requests a security change and handles the response.
+     - `addMenuItem`: Adds a new menu item labeled "Refresh Data".
+     - `updateMenuItem`: Updates the existing menu item's label to "Refresh Data (Updated)".
+     - `removeMenuItem`: Removes the menu item and resets `menuItemId`.
+
+3. **Design the Widget Template**
+
+   Open `src/app/components/widget/widget.component.html` and add the following code:
+
+   ```html
+   <!-- src/app/components/widget/widget.component.html -->
+
+   <div class="widget">
+   	<h1>TakeProfit Widget</h1>
+   	<p>Welcome to your first TakeProfit widget!</p>
+   	<button
+   		(click)="changeSecurity('AAPL;BATS')"
+   		class="btn"
+   	>
+   		Set Security to AAPL
+   	</button>
+   	<button
+   		(click)="changeSecurity('META;BATS')"
+   		class="btn"
+   	>
+   		Set Security to META
+   	</button>
+   	<div class="menu-actions">
+   		<button
+   			(click)="addMenuItem()"
+   			class="btn"
+   		>
+   			Add Refresh Data Menu Item
+   		</button>
+   		<button
+   			(click)="updateMenuItem()"
+   			class="btn"
+   			[disabled]="!menuItemId"
+   		>
+   			Update Menu Item
+   		</button>
+   		<button
+   			(click)="removeMenuItem()"
+   			class="btn"
+   			[disabled]="!menuItemId"
+   		>
+   			Remove Menu Item
+   		</button>
+   	</div>
+   </div>
+   ```
+
+4. **Style the Widget**
+
+   Open `src/app/components/widget/widget.component.css` and add the following styles:
+
+   ```css
+   /* src/app/components/widget/widget.component.css */
+
+   .widget {
+   	padding: 20px;
+   	font-family: Arial, sans-serif;
+   	text-align: center;
+   	background-color: #f0f2f5;
+   	border-radius: 8px;
+   	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   	max-width: 400px;
+   	margin: auto;
+   }
+
+   .btn {
+   	margin: 10px;
+   	padding: 10px 20px;
+   	font-size: 16px;
+   	cursor: pointer;
+   	border: none;
+   	border-radius: 4px;
+   	background-color: #007bff;
+   	color: #fff;
+   	transition: background-color 0.3s ease;
+   }
+
+   .btn:hover {
+   	background-color: #0056b3;
+   }
+
+   .btn:disabled {
+   	background-color: #cccccc;
+   	cursor: not-allowed;
+   }
+
+   .menu-actions {
+   	margin-top: 20px;
+   }
+   ```
+
+   **Explanation:**
+
+   - Centers the widget with padding, background color, and box shadow.
+   - Styles buttons for better user experience.
+   - Disables buttons appropriately when no menu item is present.
+
+5. **Include the Widget Component in Your App**
+
+   Open `src/app/app.component.html` and replace its content with the widget component selector:
+
+   ```html
+   <!-- src/app/app.component.html -->
+
+   <app-widget></app-widget>
+   ```
+
+---
+
+## Manage Widget State and Interactions
+
+1. **Handle Widget and Channel State Changes**
+
+   The widget component (`widget.component.ts`) already includes methods to handle widget and channel state changes (`handleWidgetChange` and `handleChannelChange`). These methods log the updated states to the console. You can expand these methods to perform additional actions based on state changes as needed.
+
+2. **Implement Additional Interactions**
+
+   Depending on your widget's requirements, you can add more functionalities such as updating menu items, handling user inputs, and integrating real-time data feeds. The current implementation includes buttons to change security and manage menu items, demonstrating basic interactions with the SDK.
+
+---
+
+## Add Menu Items
+
+Enhance your widget by adding custom menu items to the widget header.
+
+1. **Implement Menu Item Functions in `widget.component.ts`**
+
+   The menu item functions are already implemented in Step 5. Here's a recap:
+
+   - **Add Menu Item**
+
+     ```typescript
+     async addMenuItem(): Promise<void> {
+       try {
+         const id = await this.tpWidgetSdk.addMenuItem('Refresh Data', () => {
+           console.log('Refresh Data menu item clicked.');
+           // Implement refresh logic here
+         }, false);
+         this.menuItemId = id;
+         console.log(`Menu item added with ID: ${id}`);
+       } catch (error) {
+         console.error('Failed to add menu item:', error);
+       }
+     }
+     ```
+
+   - **Update Menu Item**
+
+     ```typescript
+     async updateMenuItem(): Promise<void> {
+       if (!this.menuItemId) return;
+       try {
+         const success = await this.tpWidgetSdk.updateMenuItem(this.menuItemId, false, 'Refresh Data (Updated)');
+         if (success) {
+           console.log('Menu item updated successfully.');
+         }
+       } catch (error) {
+         console.error('Failed to update menu item:', error);
+       }
+     }
+     ```
+
+   - **Remove Menu Item**
+
+     ```typescript
+     async removeMenuItem(): Promise<void> {
+       if (!this.menuItemId) return;
+       try {
+         const success = await this.tpWidgetSdk.removeMenuItem(this.menuItemId);
+         if (success) {
+           console.log('Menu item removed successfully.');
+           this.menuItemId = null;
+         }
+       } catch (error) {
+         console.error('Failed to remove menu item:', error);
+       }
+     }
+     ```
+
+   **Explanation:**
+
+   - **Add Menu Item**: Adds a new menu item labeled "Refresh Data" to the widget header. Upon successful addition, stores the `menuItemId`.
+   - **Update Menu Item**: Updates the existing menu item's label to "Refresh Data (Updated)".
+   - **Remove Menu Item**: Removes the menu item using the stored `menuItemId` and resets it.
+
+2. **Ensure Unique Menu Item IDs**
+
+   When adding multiple menu items, ensure each has a unique `menuItemId` to prevent conflicts. In this example, we're managing a single menu item, but you can extend this logic to handle multiple items as needed.
+
+---
+
+## Test Your Widget Locally
+
+1. **Start the Server**
+
+   Ensure your Express server is running to serve the widget with the configured headers:
+
+   ```bash
+   node server.js
+   ```
+
+   Your widget will be accessible at `http://localhost:8080`.
+
+2. **Configure Local Storage for Testing**
+
+   To simulate the widget's presence on the TakeProfit platform, configure local storage in your browser:
+
+   - **Open the TakeProfit Platform**: Navigate to the TakeProfit platform in your browser.
+   - **Open Developer Console**: Press `F12` or `Ctrl+Shift+I` to open the developer tools.
+   - **Set Local Storage Entry**:
+
+     ```javascript
+     localStorage.setItem(
+     	"takeprofit.integrations.third_party_widget_options",
+     	JSON.stringify([
+     		{
+     			iframeUrl: "http://localhost:8080", // Your widget's URL
+     			enableChannelSupport: false, // Set to true if your widget supports channels
+     			title: "Angular Widget",
+     			imageUrl: "https://example.com/icon.png", // Replace with your widget icon URL
+     		},
+     	])
+     );
+     ```
+
+     **Note**:
+
+     - Replace `'http://localhost:8080'` with your actual widget URL if different.
+     - Provide a valid `imageUrl` for the widget icon.
+
+3. **Reload the TakeProfit Platform**
+
+   Refresh the TakeProfit platform page. Your Angular widget should now appear in the widget panel, allowing you to add it to the dashboard and interact with its functionalities.
+
+4. **Verify Functionality**
+
+   - **Security Change**: Click on the "Set Security" buttons and observe the console logs for successful changes.
+   - **Menu Items**: Add the "Refresh Data" menu item and click it to see the corresponding console log. Test updating and removing the menu item to ensure they function as expected.
+
+---
+
+## Deploy Your Widget
+
+Once testing is successful, deploy your widget to a live environment.
+
+1. **Choose a Hosting Service**
+
+   Select a hosting service that can serve Angular applications and supports custom HTTP headers. Some popular options include:
+
+   - **Vercel**
+   - **Netlify**
+   - **AWS Amplify**
+   - **Heroku**
+
+2. **Prepare Your Files for Deployment**
+
+   Ensure all your files (`dist/my-tp-widget`, `server.js`, etc.) are correctly set up and that your server configuration (`server.js`) is compatible with your hosting service.
+
+3. **Deploy to Heroku (Example)**
+
+   Here's how to deploy your widget to Heroku with the necessary headers:
+
+   - **Install Heroku CLI**
+
+     ```bash
+     npm install -g heroku
+     ```
+
+   - **Log in to Heroku**
+
+     ```bash
+     heroku login
+     ```
+
+   - **Create a New Heroku App**
+
+     ```bash
+     heroku create your-app-name
+     ```
+
+     Replace `your-app-name` with your desired app name.
+
+   - **Set Buildpacks**
+
+     Heroku needs to know how to build your app. Set the Node.js buildpack:
+
+     ```bash
+     heroku buildpacks:set heroku/nodejs
+     ```
+
+   - **Add a `Procfile`**
+
+     Create a `Procfile` in the root of your project to specify how to run your app:
+
+     ```bash
+     touch Procfile
+     ```
+
+     Add the following line to `Procfile`:
+
+     ```procfile
+     web: node server.js
+     ```
+
+   - **Commit Your Changes**
+
+     ```bash
+     git init
+     git add .
+     git commit -m "Initial commit"
+     ```
+
+   - **Deploy to Heroku**
+
+     ```bash
+     git push heroku master
+     ```
+
+     **Note**: If you're using the `main` branch, use `git push heroku main` instead.
+
+4. **Update Local Storage Configuration**
+
+   After deployment, update the `iframeUrl` in the TakeProfit platform's local storage to point to your deployed widget's URL:
+
+   ```javascript
+   localStorage.setItem(
+   	"takeprofit.integrations.third_party_widget_options",
+   	JSON.stringify([
+   		{
+   			iframeUrl: "https://your-app-name.herokuapp.com", // Your deployed widget's URL
+   			enableChannelSupport: false,
+   			title: "Angular Widget",
+   			imageUrl: "https://yourdomain.com/icon.png", // Your widget's icon URL
+   		},
+   	])
+   );
+   ```
+
+5. **Final Testing**
+
+   Reload the TakeProfit platform and verify that your deployed widget functions correctly in the live environment. Test all functionalities, including security changes and menu item interactions, to ensure seamless integration.
+
+---
+
+## Best Practices
+
+- **Secure Communication**: Always serve your widget over HTTPS to ensure secure communication with the TakeProfit platform.
+- **Unique Identifiers**: Ensure that `requestId` and `menuItemId` are unique to prevent conflicts.
+- **Subscription Management**: Always unsubscribe from state changes when they're no longer needed to prevent memory leaks.
+
+  ```typescript
+  ngOnDestroy(): void {
+    this.tpWidgetSdk.unsubscribeWidgetChange(this.handleWidgetChange.bind(this));
+    this.tpWidgetSdk.unsubscribeChannelChange(this.handleChannelChange.bind(this));
+    this.tpWidgetSdk.cleanupSDK();
+  }
+  ```
+
+- **Error Handling**: Implement robust error handling for all asynchronous operations to enhance user experience.
+
+  ```typescript
+  async addMenuItem(): Promise<void> {
+    try {
+      const id = await this.tpWidgetSdk.addMenuItem('Refresh Data', () => {
+        console.log('Refresh Data menu item clicked.');
+        // Implement refresh logic here
+      }, false);
+      this.menuItemId = id;
+      console.log(`Menu item added with ID: ${id}`);
+    } catch (error) {
+      console.error('Failed to add menu item:', error);
+    }
+  }
+  ```
+
+- **Performance Optimization**: Limit the number of active subscriptions and avoid unnecessary state updates to maintain optimal performance.
+- **Code Documentation**: Keep your code well-documented to facilitate maintenance and future enhancements.
+- **Responsive Design**: Ensure your widget is responsive and functions seamlessly across different devices and screen sizes.
+
+---
+
+## Next Steps
+
+Congratulations! You've successfully created and integrated your first widget using **Angular** and the **TakeProfit Widget SDK** (version **0.2.3**). To further enhance your widget, consider the following:
+
+- **Explore Advanced SDK Features**: Refer to the [SDK Reference](/sdk/reference) to utilize all available methods and message types.
+- **Implement Real-Time Data**: Integrate real-time data feeds to provide dynamic and up-to-date information within your widget.
+- **Customize the UI**: Enhance the user interface with additional Angular components and styling to improve user engagement.
+- **Add More Interactions**: Implement more interactive features like custom events, notifications, and user preferences.
+- **Optimize**: Ensure your widget is responsive and functions seamlessly across different devices and screen sizes.
+- **Security Enhancements**: Implement additional security measures to safeguard data and ensure secure communication.
+
+For comprehensive details, refer to the [SDK Reference](/sdk/reference) and other documentation resources provided by the TakeProfit Widget SDK.
+
+---
+
+## Troubleshooting
+
+If you encounter issues while setting up or using the TakeProfit Widget SDK, consider the following solutions:
+
+1. **SDK Not Connecting**
+
+   - **Check Origins**: Ensure that your widget's domain is allowed and matches the trusted origins (`takeprofit.com`).
+   - **Network Issues**: Verify that there are no network restrictions or firewall rules blocking communication.
+
+2. **Menu Items Not Appearing**
+
+   - **Local Storage Configuration**: Double-check the `iframeUrl` and ensure it points to the correct widget URL.
+   - **SDK Initialization**: Ensure that `TPWidgetSDK.connect()` and `TPWidgetSDK.hideLoader()` are called successfully.
+
+3. **Security Change Fails**
+
+   - **Valid Security ID**: Ensure that the `securityID` you are requesting is valid and recognized by the platform.
+   - **Error Handling**: Check the console for error messages to understand why the request failed.
+
+4. **Unhandled Promise Rejections**
+
+   - **Implement `.catch` Blocks**: Ensure that all asynchronous SDK methods have proper error handling using `.catch` to manage rejected promises.
+
+5. **Performance Issues**
+
+   - **Optimize Subscriptions**: Limit the number of active subscriptions and avoid unnecessary state updates.
+   - **Efficient Rendering**: Ensure that your Angular components are optimized to prevent unnecessary re-renders.
+
+For persistent issues, refer to the [Support and Resources](#additional-resources) section or contact the support team for assistance.
+
+---
+
+## Additional Resources
+
+- **[Installation Guide](/sdk/installation)**: Detailed instructions for installing the SDK.
+- **[SDK Reference](/sdk/reference)**: Comprehensive documentation of all available methods, interfaces, and message types.
+- **[Creating Your First Widget](/sdk/first-widget)**: A practical guide to building and testing a basic widget.
+- **[Angular Documentation](https://angular.io/docs)**: Official Angular documentation for deeper understanding.
+- **[TypeScript Documentation](https://www.typescriptlang.org/docs/)**: Learn more about TypeScript for enhanced type safety.
+- **[Express Documentation](https://expressjs.com/)**: Official Express documentation for server setup.
+- **[Content Security Policy (CSP) Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)**: Learn more about CSP for enhancing security.
+- **[HTTP Headers Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers)**: Understand various HTTP headers for better configuration.

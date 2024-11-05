@@ -1,0 +1,986 @@
+---
+title: Widget SDK Reference
+description: This SDK reference provides comprehensive details about the methods, interfaces, and message types available in the TakeProfit Widget SDK. It is designed to help developers effectively integrate and utilize the SDK to build interactive widgets within the TakeProfit platform.
+---
+
+- [Interfaces](#interfaces)
+  - [Channel](#channel)
+  - [WidgetStateInfo](#widgetstateinfo)
+  - [Security](#security)
+  - [Message Types](#message-types)
+- [Message Type Guards](#message-type-guards)
+- [Classes and Methods](#classes-and-methods)
+  - [TPWidgetSDK](#tpwidgetsdk)
+    - [Methods](#methods)
+      - [`connect()`](#connect)
+      - [`disconnect()`](#disconnect)
+      - [`hideLoader()`](#hideloader)
+      - [`getWidgetState()`](#getwidgetstate)
+      - [`getChannelState()`](#getchannelstate)
+      - [`subscribeWidgetChange(callback)`](#subscribewidgetchangecallback)
+      - [`unsubscribeWidgetChange(callback)`](#unsubscribewidgetchangecallback)
+      - [`subscribeChannelChange(callback)`](#subscribechannelchangecallback)
+      - [`unsubscribeChannelChange(callback)`](#unsubscribechannelchangecallback)
+      - [`requestChangeSecurity(securityID, callback)`](#requestchangesecuritysecurityid-callback)
+      - [`addMenuItem(label, callback, disabled)`](#addmenuitemlabel-callback-disabled)
+      - [`updateMenuItem(menuItemId, disabled, menuItemLabel)`](#updatemenuitemmenuitemid-disabled-menuitemlabel)
+      - [`removeMenuItem(menuItemId)`](#removemenuitemmenuitemid)
+- [Internal Mechanisms](#internal-mechanisms)
+  - [Message Handling](#message-handling)
+  - [Subscription Management](#subscription-management)
+- [Usage Examples](#usage-examples)
+  - [Initializing the SDK](#initializing-the-sdk)
+  - [Changing Security](#changing-security)
+  - [Managing Menu Items](#managing-menu-items)
+- [Error Handling](#error-handling)
+- [Best Practices](#best-practices)
+- [Appendix](#appendix)
+  - [Type Definitions](#type-definitions)
+
+---
+
+The **TakeProfit Widget SDK** facilitates the integration of custom widgets into the TakeProfit platform. It provides a set of APIs for managing widget states, handling security changes, and interacting with platform events. The SDK leverages the `postMessage` API to enable communication between the embedded widget (via an iframe) and the parent platform.
+
+---
+
+## Interfaces
+
+### Channel
+
+Represents a trading channel within the TakeProfit platform, containing information about the current security and its identifier.
+
+```typescript
+interface Channel {
+	ID: string;
+	securityID: SecurityID | null;
+	security: Security | null;
+}
+```
+
+- **Properties:**
+  - `ID` (`string`): Unique identifier for the channel.
+  - `securityID` (`SecurityID | null`): Identifier for the associated security. `null` if no security is selected.
+  - `security` (`Security | null`): Details of the current security. `null` if no security is selected.
+
+### WidgetStateInfo
+
+Represents the current state of the widget, including its active status and display mode.
+
+```typescript
+interface WidgetStateInfo {
+	widgetID: string;
+	channelID: string | null;
+	active: boolean;
+	fullscreen: boolean;
+}
+```
+
+- **Properties:**
+  - `widgetID` (`string`): Unique identifier for the widget.
+  - `channelID` (`string | null`): Identifier of the associated channel. `null` if not associated with any channel.
+  - `active` (`boolean`): Indicates whether the widget is active.
+  - `fullscreen` (`boolean`): Indicates whether the widget is displayed in fullscreen mode.
+
+### Security
+
+Provides detailed information about a specific financial security, such as a stock.
+
+```typescript
+interface Security {
+	ID: SecurityID;
+	ticker: string;
+	precision: number;
+	name: string;
+	exchangeCode?: string;
+	iconURL?: string;
+	iconBase64?: string;
+	iconBackgroundColor?: string;
+	className?: string;
+	classNameTopLevel?: string;
+	companyName?: string;
+	countryCode?: string;
+	exchangeAlias?: string;
+	industryName?: string;
+}
+```
+
+- **Properties:**
+  - `ID` (`SecurityID`): Unique identifier for the security (e.g., `"AAPL;BATS"`).
+  - `ticker` (`string`): Ticker symbol of the security (e.g., `"AAPL"`).
+  - `precision` (`number`): Decimal precision for pricing.
+  - `name` (`string`): Full name of the security (e.g., `"Apple Inc."`).
+  - `exchangeCode` (`string | undefined`): Code of the exchange.
+  - `iconURL` (`string | undefined`): URL to the security's icon.
+  - `iconBase64` (`string | undefined`): Base64-encoded icon data.
+  - `iconBackgroundColor` (`string | undefined`): Background color for the icon.
+  - `className` (`string | undefined`): Classification name (e.g., `"Common stocks"`).
+  - `classNameTopLevel` (`string | undefined`): Top-level classification (e.g., `"Equity"`).
+  - `companyName` (`string | undefined`): Name of the company.
+  - `countryCode` (`string | undefined`): Country code (e.g., `"US"`).
+  - `exchangeAlias` (`string | undefined`): Alias for the exchange (e.g., `"NASDAQ"`).
+  - `industryName` (`string | undefined`): Name of the industry (e.g., `"Radio & TV communications equipment"`).
+
+### Message Types
+
+Defines the structure of messages exchanged between the widget and the TakeProfit platform.
+
+#### WidgetUpdateMessage
+
+Updates the state of the widget.
+
+```typescript
+interface WidgetUpdateMessage {
+	type: "widgetUpdate";
+	payload: WidgetStateInfo;
+}
+```
+
+- **Properties:**
+  - `type` (`'widgetUpdate'`): Message type identifier.
+  - `payload` (`WidgetStateInfo`): New state information for the widget.
+
+#### ChannelUpdateMessage
+
+Updates the state of a channel.
+
+```typescript
+interface ChannelUpdateMessage {
+	type: "channelUpdate";
+	payload: Channel;
+}
+```
+
+- **Properties:**
+  - `type` (`'channelUpdate'`): Message type identifier.
+  - `payload` (`Channel`): New channel information.
+
+#### RequestSecurityChange
+
+Requests a change in the selected security.
+
+```typescript
+interface RequestSecurityChange {
+	type: "requestSecurityChange";
+	payload: {
+		requestId: number;
+		securityID: SecurityID;
+	};
+}
+```
+
+- **Properties:**
+  - `type` (`'requestSecurityChange'`): Message type identifier.
+  - `payload`:
+    - `requestId` (`number`): Unique identifier for tracking the request.
+    - `securityID` (`SecurityID`): Identifier of the new security to be selected.
+
+#### SecurityChangeResult
+
+Indicates the result of a security change request.
+
+```typescript
+interface SecurityChangeResult {
+	type: "securityChangeResult";
+	payload: {
+		isSuccessful: boolean;
+		requestId: number;
+		error: string;
+	};
+}
+```
+
+- **Properties:**
+  - `type` (`'securityChangeResult'`): Message type identifier.
+  - `payload`:
+    - `isSuccessful` (`boolean`): Indicates if the security change was successful.
+    - `requestId` (`number`): Identifier for tracking the request.
+    - `error` (`string`): Error message if the request failed.
+
+#### RequestAddMenuItem
+
+Requests the addition of a menu item to the widget header.
+
+```typescript
+interface RequestAddMenuItem {
+	type: "requestAddMenuItem";
+	payload: {
+		requestId: number;
+		menuItemLabel: string;
+		eventName: string;
+		menuItemId: number;
+		disabled: boolean;
+	};
+}
+```
+
+- **Properties:**
+  - `type` (`'requestAddMenuItem'`): Message type identifier.
+  - `payload`:
+    - `requestId` (`number`): Unique identifier for tracking the request.
+    - `menuItemLabel` (`string`): Label for the new menu item.
+    - `eventName` (`string`): Event name triggered when the menu item is clicked.
+    - `menuItemId` (`number`): Identifier for the new menu item.
+    - `disabled` (`boolean`): Indicates if the menu item should be disabled.
+
+#### MenuEventMessage
+
+Triggered when a menu item is clicked.
+
+```typescript
+interface MenuEventMessage {
+	type: "menuEvent";
+	payload: {
+		eventName: string;
+	};
+}
+```
+
+- **Properties:**
+  - `type` (`'menuEvent'`): Message type identifier.
+  - `payload`:
+    - `eventName` (`string`): Name of the event associated with the clicked menu item.
+
+#### Other Message Types
+
+- `RequestInitData`: Used to request initial data. No payload.
+- `RequestCloseConnect`: Used to request the closing of a connection. No payload.
+
+#### Union Type: Message
+
+A union type encompassing all possible message types exchanged between the widget and the platform.
+
+```typescript
+type Message =
+	| WidgetUpdateMessage
+	| ChannelUpdateMessage
+	| typeof RequestInitData
+	| typeof RequestCloseConnect
+	| RequestSecurityChange
+	| SecurityChangeResult
+	| typeof RequestHideLoader
+	| RequestAddMenuItem
+	| RequestUpdateMenuItem
+	| RequestRemoveMenuItem
+	| ManageMenuItemResults
+	| MenuEventMessage;
+```
+
+---
+
+## Message Type Guards
+
+Type guard functions to determine the type of incoming messages.
+
+### `isWidgetUpdateMessage`
+
+Checks if a message is a `WidgetUpdateMessage`.
+
+```typescript
+const isWidgetUpdateMessage = (
+	message: Message
+): message is WidgetUpdateMessage => {
+	return message.type === "widgetUpdate";
+};
+```
+
+### `isChannelUpdateMessage`
+
+Checks if a message is a `ChannelUpdateMessage`.
+
+```typescript
+const isChannelUpdateMessage = (
+	message: Message
+): message is ChannelUpdateMessage => {
+	return message.type === "channelUpdate";
+};
+```
+
+### `isSecurityChangeResult`
+
+Checks if a message is a `SecurityChangeResult`.
+
+```typescript
+const isSecurityChangeResult = (
+	message: Message
+): message is SecurityChangeResult => {
+	return message.type === "securityChangeResult";
+};
+```
+
+### `isMenuItemRequestResult`
+
+Checks if a message is a `ManageMenuItemResults` type.
+
+```typescript
+const isMenuItemRequestResult = (
+	message: Message
+): message is ManageMenuItemResults => {
+	return (
+		message.type === "addMenuItemResult" ||
+		message.type === "updateMenuItemResult" ||
+		message.type === "removeMenuItemResult"
+	);
+};
+```
+
+### `isMenuEventMessage`
+
+Checks if a message is a `MenuEventMessage`.
+
+```typescript
+const isMenuEventMessage = (message: Message): message is MenuEventMessage => {
+	return message.type === "menuEvent";
+};
+```
+
+---
+
+## Classes and Methods
+
+### TPWidgetSDK
+
+The primary class for interacting with the TakeProfit platform. It provides methods for establishing connections, managing widget and channel states, handling security changes, and managing menu items.
+
+#### Methods
+
+| Method                                                                                                    | Description                                                                              |
+| --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [`connect()`](#connect)                                                                                   | Establishes a connection with the platform and initializes message handling.             |
+| [`disconnect()`](#disconnect)                                                                             | Removes message event listeners, effectively disconnecting the widget from the platform. |
+| [`hideLoader()`](#hideloader)                                                                             | Signals the platform to hide the loading screen, indicating that the widget is ready.    |
+| [`getWidgetState()`](#getwidgetstate)                                                                     | Retrieves the current state of the widget.                                               |
+| [`getChannelState()`](#getchannelstate)                                                                   | Retrieves the current state of the channel.                                              |
+| [`subscribeWidgetChange(callback)`](#subscribewidgetchangecallback)                                       | Subscribes to widget state changes.                                                      |
+| [`unsubscribeWidgetChange(callback)`](#unsubscribewidgetchangecallback)                                   | Unsubscribes from widget state changes.                                                  |
+| [`subscribeChannelChange(callback)`](#subscribechannelchangecallback)                                     | Subscribes to channel state changes.                                                     |
+| [`unsubscribeChannelChange(callback)`](#unsubscribechannelchangecallback)                                 | Unsubscribes from channel state changes.                                                 |
+| [`requestChangeSecurity(securityID, callback)`](#requestchangesecuritysecurityid-callback)                | Requests a change in the selected security.                                              |
+| [`addMenuItem(label, callback, disabled)`](#addmenuitemlabel-callback-disabled)                           | Adds a new menu item to the widget header.                                               |
+| [`updateMenuItem(menuItemId, disabled, menuItemLabel)`](#updatemenuitemmenuitemid-disabled-menuitemlabel) | Updates an existing menu item in the widget header.                                      |
+| [`removeMenuItem(menuItemId)`](#removemenuitemmenuitemid)                                                 | Removes a menu item from the widget header.                                              |
+
+---
+
+#### `connect()`
+
+**Description**: Establishes a connection with the TakeProfit platform by adding a message event listener and requesting initial data.
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.connect();
+```
+
+**Behavior**:
+
+- Adds an event listener for messages from the parent window.
+- Sends a `RequestInitData` message to the parent to retrieve initial widget and channel states.
+
+---
+
+#### `disconnect()`
+
+**Description**: Disconnects the widget from the TakeProfit platform by removing the message event listener.
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.disconnect();
+```
+
+**Behavior**:
+
+- Removes the message event listener, stopping any further communication with the platform.
+
+---
+
+#### `hideLoader()`
+
+**Description**: Signals the TakeProfit platform to hide the loading screen, indicating that the widget has finished loading and is ready for interaction.
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.hideLoader();
+```
+
+**Behavior**:
+
+- Sends a `RequestHideLoader` message to the parent window.
+
+---
+
+#### `getWidgetState()`
+
+**Description**: Retrieves the current state of the widget.
+
+**Returns**: `WidgetStateInfo | null` - The current widget state or `null` if not available.
+
+**Usage**:
+
+```javascript
+const currentState = TPWidgetSDK.getWidgetState();
+console.log(currentState);
+```
+
+---
+
+#### `getChannelState()`
+
+**Description**: Retrieves the current state of the channel.
+
+**Returns**: `Channel | null` - The current channel state or `null` if not available.
+
+**Usage**:
+
+```javascript
+const currentChannel = TPWidgetSDK.getChannelState();
+console.log(currentChannel);
+```
+
+---
+
+#### `subscribeWidgetChange(callback)`
+
+**Description**: Subscribes to changes in the widget state. The provided callback is invoked whenever the widget state updates.
+
+**Parameters**:
+
+- `callback` (`(widgetState: WidgetStateInfo | null) => void`): Function to be called with the new widget state.
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.subscribeWidgetChange((newState) => {
+	console.log("Widget state updated:", newState);
+});
+```
+
+---
+
+#### `unsubscribeWidgetChange(callback)`
+
+**Description**: Unsubscribes from widget state changes, removing the specified callback from the subscription list.
+
+**Parameters**:
+
+- `callback` (`(widgetState: WidgetStateInfo | null) => void`): The callback function to remove.
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.unsubscribeWidgetChange(myCallback);
+```
+
+---
+
+#### `subscribeChannelChange(callback)`
+
+**Description**: Subscribes to changes in the channel state. The provided callback is invoked whenever the channel state updates.
+
+**Parameters**:
+
+- `callback` (`(channelState: Channel | null) => void`): Function to be called with the new channel state.
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.subscribeChannelChange((newChannel) => {
+	console.log("Channel state updated:", newChannel);
+});
+```
+
+---
+
+#### `unsubscribeChannelChange(callback)`
+
+**Description**: Unsubscribes from channel state changes, removing the specified callback from the subscription list.
+
+**Parameters**:
+
+- `callback` (`(channelState: Channel | null) => void`): The callback function to remove.
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.unsubscribeChannelChange(myCallback);
+```
+
+---
+
+#### `requestChangeSecurity(securityID, callback)`
+
+**Description**: Requests a change in the selected security. The callback is invoked with the result of the request.
+
+**Parameters**:
+
+- `securityID` (`SecurityID`): Identifier of the new security to select (e.g., `"AAPL;BATS"`).
+- `callback` (`(result: SecurityChangeResult) => void`): Function to handle the result of the security change request.
+
+**Returns**: `void`
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.requestChangeSecurity("AAPL;BATS", (result) => {
+	if (result.payload.isSuccessful) {
+		console.log("Security successfully changed.");
+	} else {
+		console.error("Security change failed:", result.payload.error);
+	}
+});
+```
+
+---
+
+#### `addMenuItem(label, callback, disabled)`
+
+**Description**: Adds a new menu item to the widget header. When the menu item is clicked, the provided callback is executed.
+
+**Parameters**:
+
+- `label` (`string`): The display label of the menu item.
+- `callback` (`() => void`): Function to execute when the menu item is clicked.
+- `disabled` (`boolean`, optional): Indicates whether the menu item should be disabled. Defaults to `false`.
+
+**Returns**: `Promise<number>` - Resolves with the ID of the added menu item if successful.
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.addMenuItem(
+	"Refresh Data",
+	() => {
+		console.log("Refresh Data menu item clicked.");
+	},
+	false
+)
+	.then((menuItemId) => {
+		console.log("Menu item added with ID:", menuItemId);
+	})
+	.catch((error) => {
+		console.error("Failed to add menu item:", error);
+	});
+```
+
+---
+
+#### `updateMenuItem(menuItemId, disabled, menuItemLabel)`
+
+**Description**: Updates an existing menu item in the widget header.
+
+**Parameters**:
+
+- `menuItemId` (`number`): The ID of the menu item to update, as returned by `addMenuItem`.
+- `disabled` (`boolean`, optional): Indicates whether the menu item should be disabled.
+- `menuItemLabel` (`string`, optional): New label for the menu item.
+
+**Returns**: `Promise<boolean>` - Resolves to `true` if the update was successful.
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.updateMenuItem(1, true, "Refresh Data Disabled")
+	.then((success) => {
+		if (success) {
+			console.log("Menu item updated successfully.");
+		}
+	})
+	.catch((error) => {
+		console.error("Failed to update menu item:", error);
+	});
+```
+
+---
+
+#### `removeMenuItem(menuItemId)`
+
+**Description**: Removes a menu item from the widget header.
+
+**Parameters**:
+
+- `menuItemId` (`number`): The ID of the menu item to remove, as returned by `addMenuItem`.
+
+**Returns**: `Promise<boolean>` - Resolves to `true` if the removal was successful.
+
+**Usage**:
+
+```javascript
+TPWidgetSDK.removeMenuItem(1)
+	.then((success) => {
+		if (success) {
+			console.log("Menu item removed successfully.");
+		}
+	})
+	.catch((error) => {
+		console.error("Failed to remove menu item:", error);
+	});
+```
+
+---
+
+## Internal Mechanisms
+
+Understanding the internal workings of the SDK can help developers troubleshoot issues and implement advanced functionalities.
+
+### Message Handling
+
+The SDK communicates with the TakeProfit platform via the `postMessage` API. It listens for incoming messages from the parent window and processes them based on their type.
+
+- **Security**: Only messages from trusted origins (`takeprofit.com`) are processed.
+- **Type Guards**: The SDK uses type guard functions (e.g., `isWidgetUpdateMessage`) to determine the type of incoming messages.
+- **State Updates**: Upon receiving relevant messages, the SDK updates internal state variables (`widgetState`, `channelState`) and notifies subscribed callbacks.
+
+### Subscription Management
+
+The SDK maintains various subscription lists and maps to handle callbacks for different events:
+
+- **Widget and Channel Changes**: Arrays (`widgetChangeSubscriptions`, `channelChangeSubscriptions`) store callback functions that are invoked when the widget or channel state updates.
+- **Security and Menu Item Requests**: Maps (`changeSecuritySubscriptions`, `menuItemSubscriptions`) track callbacks associated with specific request IDs, ensuring the correct callback is executed when a response is received.
+- **Menu Item Events**: A map (`menuItemsCallbacks`) associates event names with callback functions, allowing the SDK to execute the appropriate callback when a menu item is clicked.
+
+---
+
+## Usage Examples
+
+### Initializing the SDK
+
+To start using the SDK, initialize the connection and hide the loader once the widget is ready.
+
+```javascript
+import { TPWidgetSDK } from "takeprofit-widget-sdk";
+
+TPWidgetSDK.connect();
+
+// Once the widget is fully loaded
+TPWidgetSDK.hideLoader();
+```
+
+---
+
+### Changing Security
+
+Request a change in the selected security and handle the result.
+
+```javascript
+TPWidgetSDK.requestChangeSecurity("AAPL;BATS", (result) => {
+	if (result.payload.isSuccessful) {
+		console.log("Security successfully changed to AAPL.");
+	} else {
+		console.error("Security change failed:", result.payload.error);
+	}
+});
+```
+
+---
+
+### Managing Menu Items
+
+Add a new menu item and handle its click event.
+
+```javascript
+TPWidgetSDK.addMenuItem(
+	"Refresh Data",
+	() => {
+		console.log("Refresh Data menu item clicked.");
+	},
+	false
+)
+	.then((menuItemId) => {
+		console.log("Menu item added with ID:", menuItemId);
+	})
+	.catch((error) => {
+		console.error("Failed to add menu item:", error);
+	});
+
+// Later, update the menu item
+TPWidgetSDK.updateMenuItem(menuItemId, true, "Refresh Data Disabled")
+	.then((success) => {
+		if (success) {
+			console.log("Menu item updated successfully.");
+		}
+	})
+	.catch((error) => {
+		console.error("Failed to update menu item:", error);
+	});
+
+// Remove the menu item
+TPWidgetSDK.removeMenuItem(menuItemId)
+	.then((success) => {
+		if (success) {
+			console.log("Menu item removed successfully.");
+		}
+	})
+	.catch((error) => {
+		console.error("Failed to remove menu item:", error);
+	});
+```
+
+---
+
+### Subscribing to State Changes
+
+Listen for updates to the widget and channel states.
+
+```javascript
+// Subscribe to widget state changes
+TPWidgetSDK.subscribeWidgetChange((newState) => {
+	console.log("Widget state updated:", newState);
+});
+
+// Subscribe to channel state changes
+TPWidgetSDK.subscribeChannelChange((newChannel) => {
+	console.log("Channel state updated:", newChannel);
+});
+```
+
+---
+
+## Error Handling
+
+The SDK uses Promises for methods that involve asynchronous operations (e.g., adding, updating, removing menu items). It's essential to handle both successful and failed operations to ensure a smooth user experience.
+
+**Example**:
+
+```javascript
+TPWidgetSDK.addMenuItem(
+	"Refresh Data",
+	() => {
+		console.log("Refresh Data clicked.");
+	},
+	false
+)
+	.then((menuItemId) => {
+		console.log("Menu item added with ID:", menuItemId);
+	})
+	.catch((error) => {
+		console.error("Error adding menu item:", error);
+	});
+```
+
+Ensure that callbacks appropriately handle success and error scenarios to maintain widget stability.
+
+---
+
+## Best Practices
+
+- **Unique `requestId`**: The SDK automatically increments `messageCounter` to generate unique `requestId`s. Avoid manually setting `requestId`s to prevent conflicts.
+- **Subscription Management**: Always unsubscribe from state changes when they're no longer needed to prevent memory leaks.
+
+  ```javascript
+  const handleWidgetChange = (newState) => {
+  	console.log("Widget state:", newState);
+  };
+
+  TPWidgetSDK.subscribeWidgetChange(handleWidgetChange);
+
+  // Later, unsubscribe
+  TPWidgetSDK.unsubscribeWidgetChange(handleWidgetChange);
+  ```
+
+- **Error Handling**: Implement comprehensive error handling for all SDK methods to gracefully manage failures.
+- **Performance**: Minimize the number of subscriptions and callbacks to essential ones to optimize performance.
+
+---
+
+## Appendix
+
+### Type Definitions
+
+For a complete understanding of the types used within the SDK, refer to the [Type Definitions](#type-definitions) below.
+
+#### `SecurityID`
+
+A template literal type representing the security identifier in the format `"TICKER;EXCHANGE"`.
+
+```typescript
+type SecurityID = `${string};${string}`;
+```
+
+#### `ManageMenuItemResults`
+
+A union type encompassing the results of menu item operations.
+
+```typescript
+type ManageMenuItemResults =
+	| AddMenuItemResult
+	| UpdateMenuItemResult
+	| RemoveMenuItemResult;
+```
+
+#### `Message`
+
+A union type that includes all possible message types exchanged between the widget and the platform.
+
+```typescript
+type Message =
+	| WidgetUpdateMessage
+	| ChannelUpdateMessage
+	| typeof RequestInitData
+	| typeof RequestCloseConnect
+	| RequestSecurityChange
+	| SecurityChangeResult
+	| typeof RequestHideLoader
+	| RequestAddMenuItem
+	| RequestUpdateMenuItem
+	| RequestRemoveMenuItem
+	| ManageMenuItemResults
+	| MenuEventMessage;
+```
+
+---
+
+## Additional Interfaces and Types
+
+### `RequestUpdateMenuItem`
+
+Requests an update to an existing menu item in the widget header.
+
+```typescript
+interface RequestUpdateMenuItem {
+	type: "requestUpdateMenuItem";
+	payload: {
+		requestId: number;
+		menuItemId: number;
+		disabled?: boolean;
+		menuItemLabel?: string;
+	};
+}
+```
+
+- **Properties:**
+  - `type` (`'requestUpdateMenuItem'`): Message type identifier.
+  - `payload`:
+    - `requestId` (`number`): Unique identifier for tracking the request.
+    - `menuItemId` (`number`): ID of the menu item to update.
+    - `disabled` (`boolean`, optional): Indicates if the menu item should be disabled.
+    - `menuItemLabel` (`string`, optional): New label for the menu item.
+
+### `RequestRemoveMenuItem`
+
+Requests the removal of a menu item from the widget header.
+
+```typescript
+interface RequestRemoveMenuItem {
+	type: "requestRemoveMenuItem";
+	payload: {
+		requestId: number;
+		menuItemId: number;
+	};
+}
+```
+
+- **Properties:**
+  - `type` (`'requestRemoveMenuItem'`): Message type identifier.
+  - `payload`:
+    - `requestId` (`number`): Unique identifier for tracking the request.
+    - `menuItemId` (`number`): ID of the menu item to remove.
+
+### `AddMenuItemResult`
+
+Indicates the result of a menu item addition request.
+
+```typescript
+interface AddMenuItemResult {
+	type: "addMenuItemResult";
+	payload: {
+		isSuccessful: boolean;
+		requestId: number;
+		error: string;
+	};
+}
+```
+
+- **Properties:**
+  - `type` (`'addMenuItemResult'`): Message type identifier.
+  - `payload`:
+    - `isSuccessful` (`boolean`): Indicates if the menu item was successfully added.
+    - `requestId` (`number`): Identifier for tracking the request.
+    - `error` (`string`): Error message if the request failed.
+
+### `UpdateMenuItemResult`
+
+Indicates the result of a menu item update request.
+
+```typescript
+interface UpdateMenuItemResult {
+	type: "updateMenuItemResult";
+	payload: {
+		isSuccessful: boolean;
+		requestId: number;
+		error: string;
+	};
+}
+```
+
+- **Properties:**
+  - `type` (`'updateMenuItemResult'`): Message type identifier.
+  - `payload`:
+    - `isSuccessful` (`boolean`): Indicates if the menu item was successfully updated.
+    - `requestId` (`number`): Identifier for tracking the request.
+    - `error` (`string`): Error message if the request failed.
+
+### `RemoveMenuItemResult`
+
+Indicates the result of a menu item removal request.
+
+```typescript
+interface RemoveMenuItemResult {
+	type: "removeMenuItemResult";
+	payload: {
+		isSuccessful: boolean;
+		requestId: number;
+		error: string;
+	};
+}
+```
+
+- **Properties:**
+  - `type` (`'removeMenuItemResult'`): Message type identifier.
+  - `payload`:
+    - `isSuccessful` (`boolean`): Indicates if the menu item was successfully removed.
+    - `requestId` (`number`): Identifier for tracking the request.
+    - `error` (`string`): Error message if the request failed.
+
+---
+
+## Type Definitions
+
+### `SecurityID`
+
+A template literal type representing the security identifier in the format `"TICKER;EXCHANGE"`.
+
+```typescript
+type SecurityID = `${string};${string}`;
+```
+
+### `ManageMenuItemResults`
+
+A union type encompassing the results of menu item operations.
+
+```typescript
+type ManageMenuItemResults =
+	| AddMenuItemResult
+	| UpdateMenuItemResult
+	| RemoveMenuItemResult;
+```
+
+### `Message`
+
+A union type that includes all possible message types exchanged between the widget and the platform.
+
+```typescript
+type Message =
+	| WidgetUpdateMessage
+	| ChannelUpdateMessage
+	| typeof RequestInitData
+	| typeof RequestCloseConnect
+	| RequestSecurityChange
+	| SecurityChangeResult
+	| typeof RequestHideLoader
+	| RequestAddMenuItem
+	| RequestUpdateMenuItem
+	| RequestRemoveMenuItem
+	| ManageMenuItemResults
+	| MenuEventMessage;
+```

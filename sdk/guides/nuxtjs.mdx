@@ -1,0 +1,825 @@
+---
+title: Nuxt.js
+description: This guide provides a comprehensive, step-by-step process to create your first custom widget using **Nuxt.js** and the **TakeProfit Widget SDK** (version **0.2.3**). By following this guide, you'll set up a Nuxt.js project, integrate the SDK, configure necessary security headers, and implement basic functionalities to interact with the TakeProfit platform. This example serves as a foundation for building more complex and feature-rich widgets tailored to your specific needs.
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following:
+
+- **Node.js**: Version 14 or higher. Download from [Node.js Official Website](https://nodejs.org/).
+- **npm** or **Yarn**: Package managers that come with Node.js.
+- **Code Editor**: Such as [Visual Studio Code](https://code.visualstudio.com/).
+- **Basic Knowledge**: Familiarity with **JavaScript**, **Vue.js**, and **Nuxt.js**.
+- **Access to TakeProfit Platform**: For widget integration and testing.
+
+---
+
+## Set Up Your Nuxt.js Project
+
+1. **Create a New Nuxt.js App**
+
+   Use **create-nuxt-app** to bootstrap a new Nuxt.js project. Open your terminal and run:
+
+   ```bash
+   npx create-nuxt-app my-tp-widget
+   ```
+
+   Follow the prompts to set up your project. For this guide, it's recommended to select the following options:
+
+   - **Choose the package manager**: `npm` or `Yarn`
+   - **Choose UI framework**: `None` (or your preferred choice)
+   - **Choose custom server framework**: `None`
+   - **Choose Nuxt.js modules**: Select based on your preference (e.g., `Axios`, `PWA`)
+   - **Choose linting tools**: As per your preference
+   - **Choose test framework**: `None` (optional)
+   - **Choose rendering mode**: `Universal (SSR / SSG)`
+
+   Replace `my-tp-widget` with your desired project name.
+
+2. **Navigate to Your Project Directory**
+
+   ```bash
+   cd my-tp-widget
+   ```
+
+3. **Start the Development Server**
+
+   Verify that your Nuxt.js app is set up correctly by starting the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+   This will run your app at `http://localhost:3000`.
+
+---
+
+## Install the TakeProfit Widget SDK
+
+1. **Install the SDK**
+
+   Integrate the TakeProfit Widget SDK into your Nuxt.js project by installing it via **npm** or **Yarn**:
+
+   ```bash
+   npm install takeprofit-widget-sdk@0.2.3
+   ```
+
+   Or with Yarn:
+
+   ```bash
+   yarn add takeprofit-widget-sdk@0.2.3
+   ```
+
+2. **Verify Installation**
+
+   Check your `package.json` to ensure `takeprofit-widget-sdk` is listed under `dependencies`:
+
+   ```json
+   "dependencies": {
+     "takeprofit-widget-sdk": "^0.2.3",
+     // other dependencies...
+   }
+   ```
+
+---
+
+## Configure Nuxt.js Headers for Security
+
+To ensure that your widget can be embedded securely within the TakeProfit platform, you need to configure specific HTTP headers in your Nuxt.js application.
+
+1. **Update `nuxt.config.js`**
+
+   Open `nuxt.config.js` and add the following configuration to set the necessary headers:
+
+   ```javascript
+   // nuxt.config.js
+
+   export default {
+   	// ... existing configurations
+
+   	render: {
+   		compressor: false, // Disable if using a custom server
+   	},
+
+   	serverMiddleware: [
+   		{
+   			path: "/",
+   			handler: "~/server-middleware/headers.js",
+   		},
+   	],
+
+   	// Alternatively, use the `head` property for specific pages
+   };
+   ```
+
+2. **Create Server Middleware for Headers**
+
+   Create a server middleware to set the required HTTP headers.
+
+   ```bash
+   mkdir server-middleware
+   touch server-middleware/headers.js
+   ```
+
+   Open `server-middleware/headers.js` and add the following code:
+
+   ```javascript
+   // server-middleware/headers.js
+
+   export default function (req, res, next) {
+   	res.setHeader("X-Frame-Options", "ALLOW-FROM https://takeprofit.com");
+   	res.setHeader(
+   		"Content-Security-Policy",
+   		"frame-ancestors 'self' https://takeprofit.com"
+   	);
+   	next();
+   }
+   ```
+
+   **Explanation:**
+
+   - **`X-Frame-Options`**: Controls whether your site can be embedded in an iframe. Setting it to `ALLOW-FROM https://takeprofit.com` allows the widget to be embedded only from the specified origin.
+   - **`Content-Security-Policy`**: The `frame-ancestors` directive specifies valid parents that may embed a page using `<frame>`, `<iframe>`, `<object>`, `<embed>`, or `<applet>`. Setting it to `'self' https://takeprofit.com` allows framing from the same origin and the specified TakeProfit domain.
+
+3. **Restart the Development Server**
+
+   After updating the configurations, restart your development server to apply the changes:
+
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## Initialize the SDK in Your Project
+
+1. **Create an SDK Initialization Plugin**
+
+   Nuxt.js allows you to create plugins that can run before the root Vue.js application is instantiated. We'll create a plugin to initialize the TakeProfit Widget SDK.
+
+   ```bash
+   mkdir plugins
+   touch plugins/tp-widget-sdk.js
+   ```
+
+   Open `plugins/tp-widget-sdk.js` and add the following code:
+
+   ```javascript
+   // plugins/tp-widget-sdk.js
+
+   import { TPWidgetSDK } from "takeprofit-widget-sdk";
+
+   export default ({ app }, inject) => {
+   	// Initialize the SDK
+   	TPWidgetSDK.connect();
+   	TPWidgetSDK.hideLoader();
+
+   	// Inject the SDK into the context as $tpWidgetSDK
+   	inject("tpWidgetSDK", TPWidgetSDK);
+   };
+   ```
+
+2. **Register the Plugin**
+
+   Open `nuxt.config.js` and register the plugin:
+
+   ```javascript
+   // nuxt.config.js
+
+   export default {
+   	// ... existing configurations
+
+   	plugins: [{ src: "~/plugins/tp-widget-sdk.js", mode: "client" }],
+
+   	// ... other configurations
+   };
+   ```
+
+   **Explanation:**
+
+   - **`mode: 'client'`**: Ensures that the plugin is only loaded on the client-side, as the SDK interacts with the browser environment.
+   - **`inject`**: Makes the SDK available throughout your application via `this.$tpWidgetSDK`.
+
+3. **Define Type Interfaces (Optional)**
+
+   If you're using TypeScript, you can define necessary interfaces to enhance type safety. Create `types/tp-widget-sdk.d.ts`:
+
+   ```typescript
+   // types/tp-widget-sdk.d.ts
+
+   declare module "takeprofit-widget-sdk" {
+   	export interface ResultPayload {
+   		isSuccessful: boolean;
+   		error?: string;
+   	}
+
+   	export class TPWidgetSDK {
+   		static connect(): void;
+   		static hideLoader(): void;
+   		static disconnect(): void;
+   		static subscribeWidgetChange(
+   			callback: (newState: WidgetStateInfo | null) => void
+   		): void;
+   		static unsubscribeWidgetChange(
+   			callback: (newState: WidgetStateInfo | null) => void
+   		): void;
+   		static subscribeChannelChange(
+   			callback: (newChannel: Channel | null) => void
+   		): void;
+   		static unsubscribeChannelChange(
+   			callback: (newChannel: Channel | null) => void
+   		): void;
+   		static requestChangeSecurity(
+   			securityID: SecurityID,
+   			callback: (result: { payload: ResultPayload }) => void
+   		): void;
+   		static addMenuItem(
+   			label: string,
+   			action: () => void,
+   			isPermanent: boolean
+   		): Promise<number>;
+   		static updateMenuItem(
+   			menuItemId: number,
+   			isPermanent: boolean,
+   			label: string
+   		): Promise<boolean>;
+   		static removeMenuItem(menuItemId: number): Promise<boolean>;
+   	}
+
+   	export type SecurityID = `${string};${string}`;
+
+   	export interface WidgetStateInfo {
+   		widgetID: string;
+   		channelID: string | null;
+   		active: boolean;
+   		fullscreen: boolean;
+   	}
+
+   	export interface Channel {
+   		ID: string;
+   		securityID: SecurityID | null;
+   		security: Security | null;
+   	}
+
+   	export interface Security {
+   		ID: SecurityID;
+   		ticker: string;
+   		precision: number;
+   		name: string;
+   		exchangeCode?: string;
+   		iconURL?: string;
+   		iconBase64?: string;
+   		iconBackgroundColor?: string;
+   		className?: string;
+   		classNameTopLevel?: string;
+   		companyName?: string;
+   		countryCode?: string;
+   		exchangeAlias?: string;
+   		industryName?: string;
+   	}
+   }
+   ```
+
+   **Note**: Ensure that your `tsconfig.json` includes the `types` directory:
+
+   ```json
+   // tsconfig.json
+
+   {
+   	"compilerOptions": {
+   		// ... existing options
+   		"typeRoots": ["./types", "./node_modules/@types"]
+   	}
+   	// ... other configurations
+   }
+   ```
+
+---
+
+## Create Your First Widget Page
+
+1. **Create the Widget Page**
+
+   Using Nuxt.js's file-based routing, create a new page for your widget at `pages/widget.vue`:
+
+   ```jsx
+   <!-- pages/widget.vue -->
+
+   <template>
+   	<div class="widget">
+   		<h1>TakeProfit Widget</h1>
+   		<p>Welcome to your first TakeProfit widget!</p>
+   		<button
+   			@click="changeSecurity('AAPL;BATS')"
+   			class="btn"
+   		>
+   			Set Security to AAPL
+   		</button>
+   		<button
+   			@click="changeSecurity('META;BATS')"
+   			class="btn"
+   		>
+   			Set Security to META
+   		</button>
+   		<div class="menu-actions">
+   			<button
+   				@click="addMenuItem"
+   				class="btn"
+   			>
+   				Add Refresh Data Menu Item
+   			</button>
+   			<button
+   				@click="updateMenuItem"
+   				class="btn"
+   				:disabled="!menuItemId"
+   			>
+   				Update Menu Item
+   			</button>
+   			<button
+   				@click="removeMenuItem"
+   				class="btn"
+   				:disabled="!menuItemId"
+   			>
+   				Remove Menu Item
+   			</button>
+   		</div>
+   	</div>
+   </template>
+
+   <script>
+   export default {
+   	data() {
+   		return {
+   			menuItemId: null,
+   		};
+   	},
+   	mounted() {
+   		// Subscribe to widget state changes
+   		this.$tpWidgetSDK.subscribeWidgetChange(this.handleWidgetChange);
+
+   		// Subscribe to channel state changes
+   		this.$tpWidgetSDK.subscribeChannelChange(this.handleChannelChange);
+   	},
+   	beforeDestroy() {
+   		// Unsubscribe from widget and channel changes
+   		this.$tpWidgetSDK.unsubscribeWidgetChange(this.handleWidgetChange);
+   		this.$tpWidgetSDK.unsubscribeChannelChange(this.handleChannelChange);
+   	},
+   	methods: {
+   		handleWidgetChange(newState) {
+   			console.log("Widget state updated:", newState);
+   		},
+   		handleChannelChange(newChannel) {
+   			console.log("Channel state updated:", newChannel);
+   		},
+   		changeSecurity(securityID) {
+   			this.$tpWidgetSDK.requestChangeSecurity(securityID, (result) => {
+   				if (result.payload.isSuccessful) {
+   					console.log(`Security successfully changed to ${securityID}.`);
+   				} else {
+   					console.error(
+   						`Failed to change security: ${result.payload.error}`
+   					);
+   				}
+   			});
+   		},
+   		async addMenuItem() {
+   			try {
+   				const id = await this.$tpWidgetSDK.addMenuItem(
+   					"Refresh Data",
+   					() => {
+   						console.log("Refresh Data menu item clicked.");
+   						// Implement refresh logic here
+   					},
+   					false
+   				);
+   				this.menuItemId = id;
+   				console.log(`Menu item added with ID: ${id}`);
+   			} catch (error) {
+   				console.error("Failed to add menu item:", error);
+   			}
+   		},
+   		async updateMenuItem() {
+   			if (!this.menuItemId) return;
+   			try {
+   				const success = await this.$tpWidgetSDK.updateMenuItem(
+   					this.menuItemId,
+   					false,
+   					"Refresh Data (Updated)"
+   				);
+   				if (success) {
+   					console.log("Menu item updated successfully.");
+   				}
+   			} catch (error) {
+   				console.error("Failed to update menu item:", error);
+   			}
+   		},
+   		async removeMenuItem() {
+   			if (!this.menuItemId) return;
+   			try {
+   				const success = await this.$tpWidgetSDK.removeMenuItem(
+   					this.menuItemId
+   				);
+   				if (success) {
+   					console.log("Menu item removed successfully.");
+   					this.menuItemId = null;
+   				}
+   			} catch (error) {
+   				console.error("Failed to remove menu item:", error);
+   			}
+   		},
+   	},
+   };
+   </script>
+
+   <style scoped>
+   .widget {
+   	padding: 20px;
+   	font-family: Arial, sans-serif;
+   	text-align: center;
+   }
+
+   .btn {
+   	margin: 10px;
+   	padding: 10px 20px;
+   	font-size: 16px;
+   	cursor: pointer;
+   	border: none;
+   	border-radius: 4px;
+   	background-color: #0070f3;
+   	color: #fff;
+   	transition: background-color 0.3s ease;
+   }
+
+   .btn:hover {
+   	background-color: #005bb5;
+   }
+
+   .btn:disabled {
+   	background-color: #cccccc;
+   	cursor: not-allowed;
+   }
+
+   .menu-actions {
+   	margin-top: 20px;
+   }
+   </style>
+   ```
+
+   **Explanation:**
+
+   - **Data Property**: `menuItemId` stores the ID of the added menu item.
+   - **Lifecycle Hooks**:
+     - `mounted`: Subscribes to widget and channel state changes.
+     - `beforeDestroy`: Unsubscribes from widget and channel state changes to prevent memory leaks.
+   - **Methods**:
+     - `handleWidgetChange`: Logs widget state updates.
+     - `handleChannelChange`: Logs channel state updates.
+     - `changeSecurity`: Requests a security change and handles the response.
+     - `addMenuItem`: Adds a new menu item labeled "Refresh Data" and stores its ID.
+     - `updateMenuItem`: Updates the existing menu item's label to "Refresh Data (Updated)".
+     - `removeMenuItem`: Removes the existing menu item and resets `menuItemId`.
+   - **Template**:
+     - Buttons to change security and manage menu items.
+     - Buttons are styled and conditionally disabled based on the presence of `menuItemId`.
+   - **Styles**: Scoped CSS for consistent styling.
+
+2. **Ensure Correct Routing**
+
+   Make sure that navigating to `/widget` in your Nuxt.js app renders the `widget.vue` page. You can test this by visiting `http://localhost:3000/widget` in your browser.
+
+---
+
+## Manage Widget State and Interactions
+
+1. **Handle Widget and Channel State Changes**
+
+   Ensure that your widget responds to state changes by implementing appropriate handlers within the `widget.vue` component (already demonstrated in Step 5).
+
+2. **Implement Additional Interactions**
+
+   Depending on your widget's requirements, you can add more functionalities such as updating menu items, handling user inputs, and integrating real-time data feeds.
+
+---
+
+## Add Menu Items
+
+Enhance your widget by adding custom menu items to the widget header.
+
+1. **Implement Menu Item Functions in `widget.vue`**
+
+   The menu item functions are already implemented in Step 5. Here's a recap:
+
+   - **Add Menu Item**
+
+     ```javascript
+     async addMenuItem() {
+       try {
+         const id = await this.$tpWidgetSDK.addMenuItem('Refresh Data', () => {
+           console.log('Refresh Data menu item clicked.')
+           // Implement refresh logic here
+         }, false)
+         this.menuItemId = id
+         console.log(`Menu item added with ID: ${id}`)
+       } catch (error) {
+         console.error('Failed to add menu item:', error)
+       }
+     }
+     ```
+
+   - **Update Menu Item**
+
+     ```javascript
+     async updateMenuItem() {
+       if (!this.menuItemId) return
+       try {
+         const success = await this.$tpWidgetSDK.updateMenuItem(this.menuItemId, false, 'Refresh Data (Updated)')
+         if (success) {
+           console.log('Menu item updated successfully.')
+         }
+       } catch (error) {
+         console.error('Failed to update menu item:', error)
+       }
+     }
+     ```
+
+   - **Remove Menu Item**
+
+     ```javascript
+     async removeMenuItem() {
+       if (!this.menuItemId) return
+       try {
+         const success = await this.$tpWidgetSDK.removeMenuItem(this.menuItemId)
+         if (success) {
+           console.log('Menu item removed successfully.')
+           this.menuItemId = null
+         }
+       } catch (error) {
+         console.error('Failed to remove menu item:', error)
+       }
+     }
+     ```
+
+   **Explanation:**
+
+   - **Add Menu Item**: Adds a new menu item labeled "Refresh Data" to the widget header. Upon successful addition, stores the `menuItemId` and enables the update and remove buttons.
+   - **Update Menu Item**: Updates the existing menu item's label to "Refresh Data (Updated)".
+   - **Remove Menu Item**: Removes the menu item using the stored `menuItemId` and disables the update and remove buttons.
+
+2. **Ensure Unique Menu Item IDs**
+
+   When adding multiple menu items, ensure each has a unique `menuItemId` to prevent conflicts. In this example, we're managing a single menu item, but you can extend this logic to handle multiple items as needed.
+
+---
+
+## Test Your Widget Locally
+
+1. **Start the Development Server**
+
+   Ensure your Nuxt.js app is running:
+
+   ```bash
+   npm run dev
+   ```
+
+   The app will be available at `http://localhost:3000`.
+
+2. **Configure Local Storage for Testing**
+
+   To simulate the widget's presence on the TakeProfit platform, configure local storage in your browser:
+
+   - **Open the TakeProfit Platform**: Navigate to the TakeProfit platform in your browser.
+   - **Open Developer Console**: Press `F12` or `Ctrl+Shift+I` to open the developer tools.
+   - **Set Local Storage Entry**:
+
+     ```javascript
+     localStorage.setItem(
+     	"takeprofit.integrations.third_party_widget_options",
+     	JSON.stringify([
+     		{
+     			iframeUrl: "http://localhost:3000/widget", // Your widget's URL
+     			enableChannelSupport: false, // Set to true if your widget supports channels
+     			title: "Nuxt.js Widget",
+     			imageUrl: "https://example.com/icon.png", // Replace with your widget icon URL
+     		},
+     	])
+     );
+     ```
+
+     **Note**:
+
+     - Replace `'http://localhost:3000/widget'` with your actual widget URL if different.
+     - Provide a valid `imageUrl` for the widget icon.
+
+3. **Reload the TakeProfit Platform**
+
+   Refresh the TakeProfit platform page. Your Nuxt.js widget should now appear in the widget panel, allowing you to add it to the dashboard and interact with its functionalities.
+
+4. **Verify Functionality**
+
+   - **Security Change**: Click on the "Set Security" buttons and observe the console logs for successful changes.
+   - **Menu Items**: Add the "Refresh Data" menu item and click it to see the corresponding console log. Test updating and removing the menu item to ensure they function as expected.
+
+---
+
+## Deploy Your Widget
+
+Once testing is successful, deploy your widget to a live environment.
+
+1. **Choose a Hosting Service**
+
+   Select a hosting service that can serve Nuxt.js applications and supports custom HTTP headers. Some popular options include:
+
+   - **Vercel**
+   - **Netlify**
+   - **AWS Amplify**
+   - **Heroku**
+
+2. **Prepare Your Files for Deployment**
+
+   Ensure all your files (`pages/widget.vue`, `plugins/tp-widget-sdk.js`, `server-middleware/headers.js`, etc.) are correctly set up and that your server configuration (`server-middleware/headers.js`) is compatible with your hosting service.
+
+3. **Deploy to Vercel (Example)**
+
+   Here's how to deploy your widget to Vercel with the necessary headers:
+
+   - **Install Vercel CLI**
+
+     ```bash
+     npm install -g vercel
+     ```
+
+   - **Deploy**
+
+     Run the deployment command and follow the prompts:
+
+     ```bash
+     vercel
+     ```
+
+     Vercel will automatically detect your Nuxt.js project and handle the build process.
+
+4. **Configure Headers on Vercel**
+
+   Vercel allows you to define custom headers using the `vercel.json` configuration file.
+
+   - **Create `vercel.json`**
+
+     ```bash
+     touch vercel.json
+     ```
+
+   - **Add Header Configuration**
+
+     ```json
+     // vercel.json
+     {
+     	"routes": [
+     		{
+     			"src": "/(.*)",
+     			"headers": {
+     				"X-Frame-Options": "ALLOW-FROM https://takeprofit.com",
+     				"Content-Security-Policy": "frame-ancestors 'self' https://takeprofit.com"
+     			},
+     			"dest": "/$1"
+     		}
+     	]
+     }
+     ```
+
+     **Explanation:**
+
+     - **`src`**: Matches all routes.
+     - **`headers`**: Sets the required security headers.
+     - **`dest`**: Serves the matched route.
+
+   - **Deploy with Vercel**
+
+     Deploy again to apply the new configuration:
+
+     ```bash
+     vercel --prod
+     ```
+
+5. **Update Local Storage Configuration**
+
+   After deployment, update the `iframeUrl` in the TakeProfit platform's local storage to point to your deployed widget's URL:
+
+   ```javascript
+   localStorage.setItem(
+   	"takeprofit.integrations.third_party_widget_options",
+   	JSON.stringify([
+   		{
+   			iframeUrl: "https://yourdomain.com/widget", // Your deployed widget's URL
+   			enableChannelSupport: false,
+   			title: "Nuxt.js Widget",
+   			imageUrl: "https://yourdomain.com/icon.png", // Your widget's icon URL
+   		},
+   	])
+   );
+   ```
+
+6. **Final Testing**
+
+   Reload the TakeProfit platform and verify that your deployed widget functions correctly in the live environment. Test all functionalities, including security changes and menu item interactions, to ensure seamless integration.
+
+---
+
+## Best Practices
+
+- **Secure Communication**: Always serve your widget over HTTPS to ensure secure communication with the TakeProfit platform.
+- **Unique Identifiers**: Ensure that `requestId` and `menuItemId` are unique to prevent conflicts.
+- **Subscription Management**: Always unsubscribe from state changes when they're no longer needed to prevent memory leaks.
+
+  ```javascript
+  mounted() {
+    this.$tpWidgetSDK.subscribeWidgetChange(this.handleWidgetChange)
+    this.$tpWidgetSDK.subscribeChannelChange(this.handleChannelChange)
+  },
+  beforeDestroy() {
+    this.$tpWidgetSDK.unsubscribeWidgetChange(this.handleWidgetChange)
+    this.$tpWidgetSDK.unsubscribeChannelChange(this.handleChannelChange)
+  },
+  ```
+
+- **Error Handling**: Implement robust error handling for all asynchronous operations to enhance user experience.
+
+  ```javascript
+  async addMenuItem() {
+    try {
+      const id = await this.$tpWidgetSDK.addMenuItem('Refresh Data', () => {
+        console.log('Refresh Data menu item clicked.')
+        // Implement refresh logic here
+      }, false)
+      this.menuItemId = id
+      console.log(`Menu item added with ID: ${id}`)
+    } catch (error) {
+      console.error('Failed to add menu item:', error)
+    }
+  }
+  ```
+
+- **Performance Optimization**: Limit the number of active subscriptions and avoid unnecessary state updates to maintain optimal performance.
+- **Code Documentation**: Keep your code well-documented to facilitate maintenance and future enhancements.
+- **Responsive Design**: Ensure your widget is responsive and functions seamlessly across different devices and screen sizes.
+
+---
+
+## Next Steps
+
+Congratulations! You've successfully created and integrated your first widget using **Nuxt.js** and the **TakeProfit Widget SDK** (version **0.2.3**). To further enhance your widget, consider the following:
+
+- **Explore Advanced SDK Features**: Refer to the [SDK Reference](/sdk/reference) to utilize all available methods and message types.
+- **Implement Real-Time Data**: Integrate real-time data feeds to provide dynamic and up-to-date information within your widget.
+- **Customize the UI**: Enhance the user interface with additional Vue components and styling to improve user engagement.
+- **Add More Interactions**: Implement more interactive features like custom events, notifications, and user preferences.
+- **Optimize**: Ensure your widget is responsive and functions seamlessly across different devices and screen sizes.
+- **Security Enhancements**: Implement additional security measures to safeguard data and ensure secure communication.
+
+For comprehensive details, refer to the [SDK Reference](/sdk/reference) and other documentation resources provided by the TakeProfit Widget SDK.
+
+---
+
+## Troubleshooting
+
+If you encounter issues while setting up or using the TakeProfit Widget SDK, consider the following solutions:
+
+1. **SDK Not Connecting**
+
+   - **Check Origins**: Ensure that your widget's domain is allowed and matches the trusted origins (`takeprofit.com`).
+   - **Network Issues**: Verify that there are no network restrictions or firewall rules blocking communication.
+
+2. **Menu Items Not Appearing**
+
+   - **Local Storage Configuration**: Double-check the `iframeUrl` and ensure it points to the correct widget URL.
+   - **SDK Initialization**: Ensure that `TPWidgetSDK.connect()` and `TPWidgetSDK.hideLoader()` are called successfully.
+
+3. **Security Change Fails**
+
+   - **Valid Security ID**: Ensure that the `securityID` you are requesting is valid and recognized by the platform.
+   - **Error Handling**: Check the console for error messages to understand why the request failed.
+
+4. **Unhandled Promise Rejections**
+
+   - **Implement `.catch` Blocks**: Ensure that all asynchronous SDK methods have proper error handling using `.catch` to manage rejected promises.
+
+5. **Performance Issues**
+
+   - **Optimize Subscriptions**: Limit the number of active subscriptions and avoid unnecessary state updates.
+   - **Efficient Rendering**: Ensure that your Vue components are optimized to prevent unnecessary re-renders.
+
+For persistent issues, refer to the [Support and Resources](#additional-resources) section or contact the support team for assistance.
+
+---
+
+## Additional Resources
+
+- **[Installation Guide](/sdk/installation)**: Detailed instructions for installing the SDK.
+- **[SDK Reference](/sdk/reference)**: Comprehensive documentation of all available methods, interfaces, and message types.
+- **[Creating Your First Widget](/sdk/first-widget)**: A practical guide to building and testing a basic widget.
+- **[Nuxt.js Documentation](https://nuxtjs.org/docs)**: Official Nuxt.js documentation for deeper understanding.
+- **[Vue.js Documentation](https://vuejs.org/v2/guide/)**: Official Vue.js documentation for building user interfaces.
+- **[JavaScript Documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript)**: Official JavaScript documentation for deeper understanding.
+- **[Content Security Policy (CSP) Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)**: Learn more about CSP for enhancing security.
+- **[HTTP Headers Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers)**: Understand various HTTP headers for better configuration.

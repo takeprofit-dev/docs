@@ -1,0 +1,115 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "TakeProfit",
+  "theme": "prism",
+  "topbar": {
+    "style": "gradient"
+  },
+  "logo": {
+    "dark": "/favicon.svg",
+    "light": "/favicon.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#07C983",
+    "dark": "#0D9373",
+    "anchors": {
+      "from": "#0D9373",
+      "to": "#07C983"
+    }
+  },
+  "topbarCtaButton": {
+    "name": "Platform",
+    "url": "https://takeprofit.com/platform"
+  },
+  "tabs": [
+    {
+      "name": "Indie Language",
+      "url": "indie"
+    },
+    {
+      "name": "Widget SDK",
+      "url": "sdk"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Documentation",
+      "icon": "book-open-cover",
+      "url": "/"
+    },
+    {
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.gg/WVk8TjwU7p"
+    },
+    {
+      "name": "SDK Playground",
+      "icon": "code",
+      "url": "https://stackblitz.com/edit/stackblitz-starters-cypbbn?file=README.md"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Introduction",
+      "pages": [
+        "indie/what-is-Indie",
+        "indie/language-differences-with-Python"
+      ]
+    },
+    {
+      "group": "Getting Started",
+      "pages": [
+        "indie/quick-start",
+        "indie/indicator-code-structure",
+        "indie/data-types-in-Indie",
+        "indie/how-Indies-syntactic-sugar-works"
+      ]
+    },
+    {
+      "group": "Indicator Development",
+      "pages": [
+        "indie/algorithms-for-series-processing",
+        "indie/input-parameters",
+        "indie/fills-levels-and-bands",
+        "indie/request-additional-instruments"
+      ]
+    },
+    {
+      "group": "Additional",
+      "pages": [
+        "indie/library-reference",
+        "indie/changelog"
+      ]
+    },
+    {
+      "group": "Get Started",
+      "pages": [
+        "sdk/introduction",
+        "sdk/installation",
+        "sdk/first-widget"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "sdk/guides/angular",
+        "sdk/guides/nuxtjs",
+        "sdk/guides/vanillajs"
+      ]
+    },
+    {
+      "group": "Reference",
+      "pages": [
+        "sdk/reference"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "discord": "https://discord.gg/WVk8TjwU7p",
+    "x": "https://twitter.com/TakeProfitHQ",
+    "instagram": "https://www.instagram.com/takeprofit",
+    "facebook": "https://www.facebook.com/TakeProfit"
+  }
+}

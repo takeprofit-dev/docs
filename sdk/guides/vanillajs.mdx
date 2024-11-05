@@ -1,0 +1,869 @@
+---
+title: Vanilla JS
+description: This guide provides a comprehensive, step-by-step process to create your first custom widget using **Vanilla JavaScript** and the **TakeProfit Widget SDK** (version **0.2.3**). By following this guide, you'll set up a simple project structure, integrate the SDK, configure necessary security headers, and implement basic functionalities to interact with the TakeProfit platform. This example serves as a foundation for building more complex and feature-rich widgets tailored to your specific needs.
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following:
+
+- **Node.js**: Version 14 or higher. Download from [Node.js Official Website](https://nodejs.org/).
+- **npm** or **Yarn**: Package managers that come with Node.js.
+- **Code Editor**: Such as [Visual Studio Code](https://code.visualstudio.com/).
+- **Basic Knowledge**: Familiarity with **JavaScript**, **HTML**, and **CSS**.
+- **Access to TakeProfit Platform**: For widget integration and testing.
+
+---
+
+## Set Up Your Project Structure
+
+1. **Create a Project Directory**
+
+   Open your terminal and create a new directory for your widget:
+
+   ```bash
+   mkdir my-tp-widget
+   cd my-tp-widget
+   ```
+
+2. **Initialize npm**
+
+   Initialize a new npm project to manage dependencies:
+
+   ```bash
+   npm init -y
+   ```
+
+3. **Create Essential Files and Folders**
+
+   Set up the basic structure:
+
+   ```bash
+   mkdir src
+   touch src/index.html src/styles.css src/app.js
+   ```
+
+   Your project structure should look like this:
+
+   ```
+   my-tp-widget/
+   ├── package.json
+   ├── src/
+   │   ├── index.html
+   │   ├── styles.css
+   │   └── app.js
+   ```
+
+---
+
+## Include the TakeProfit Widget SDK
+
+1. **Download the SDK**
+
+   Since you're using Vanilla JavaScript, it's easiest to include the SDK via a CDN. Ensure you reference version **0.2.3**.
+
+2. **Add the SDK Script to `index.html`**
+
+   Open `src/index.html` and include the SDK script:
+
+   ```html
+   <!-- src/index.html -->
+   <!doctype html>
+   <html lang="en">
+   	<head>
+   		<meta charset="UTF-8" />
+   		<meta
+   			http-equiv="X-UA-Compatible"
+   			content="IE=edge"
+   		/>
+   		<meta
+   			name="viewport"
+   			content="width=device-width, initial-scale=1.0"
+   		/>
+   		<title>TakeProfit Widget</title>
+   		<link
+   			rel="stylesheet"
+   			href="styles.css"
+   		/>
+   		<!-- Include TakeProfit Widget SDK -->
+   		<script src="https://cdn.jsdelivr.net/npm/takeprofit-widget-sdk@0.2.3/dist/tp-widget-sdk.min.js"></script>
+   	</head>
+   	<body>
+   		<div id="widget">
+   			<h1>TakeProfit Widget</h1>
+   			<p>Welcome to your first TakeProfit widget!</p>
+   			<button id="setAAPL">Set Security to AAPL</button>
+   			<button id="setMETA">Set Security to META</button>
+   			<div
+   				id="menu-actions"
+   				style="margin-top: 20px;"
+   			>
+   				<button id="addMenuItem">Add Refresh Data Menu Item</button>
+   				<button
+   					id="updateMenuItem"
+   					disabled
+   				>
+   					Update Menu Item
+   				</button>
+   				<button
+   					id="removeMenuItem"
+   					disabled
+   				>
+   					Remove Menu Item
+   				</button>
+   			</div>
+   		</div>
+   		<script src="app.js"></script>
+   	</body>
+   </html>
+   ```
+
+   **Explanation:**
+
+   - The SDK is included via a CDN link pointing to version **0.2.3**.
+   - Basic HTML structure with buttons to interact with the SDK.
+
+---
+
+## Configure Security Headers
+
+To ensure that your widget can be embedded securely within the TakeProfit platform, you need to configure specific HTTP headers. Since you're using Vanilla JavaScript without a build tool, you'll need to set up a simple server to serve your widget with the necessary headers.
+
+1. **Install `http-server`**
+
+   Use `http-server` to serve your files with custom headers.
+
+   ```bash
+   npm install -g http-server
+   ```
+
+2. **Create a `server.js` File**
+
+   Create a simple Node.js server to serve your widget with the required headers.
+
+   ```bash
+   touch server.js
+   ```
+
+   Open `server.js` and add the following code:
+
+   ```javascript
+   // server.js
+   const http = require("http");
+   const fs = require("fs");
+   const path = require("path");
+
+   const PORT = process.env.PORT || 8080;
+
+   const server = http.createServer((req, res) => {
+   	let filePath = path.join(
+   		__dirname,
+   		"src",
+   		req.url === "/" ? "index.html" : req.url
+   	);
+   	const extname = String(path.extname(filePath)).toLowerCase();
+   	const mimeTypes = {
+   		".html": "text/html",
+   		".js": "application/javascript",
+   		".css": "text/css",
+   		".json": "application/json",
+   		".png": "image/png",
+   		".jpg": "image/jpg",
+   		".gif": "image/gif",
+   		".wav": "audio/wav",
+   		".mp4": "video/mp4",
+   		".woff": "application/font-woff",
+   		".ttf": "application/font-ttf",
+   		".eot": "application/vnd.ms-fontobject",
+   		".otf": "application/font-otf",
+   		".svg": "application/image/svg+xml",
+   	};
+
+   	const contentType = mimeTypes[extname] || "application/octet-stream";
+
+   	fs.readFile(filePath, (error, content) => {
+   		if (error) {
+   			if (error.code === "ENOENT") {
+   				fs.readFile(
+   					path.join(__dirname, "src", "404.html"),
+   					(err, content404) => {
+   						res.writeHead(404, {
+   							"Content-Type": "text/html",
+   							"X-Frame-Options": "ALLOW-FROM https://takeprofit.com",
+   							"Content-Security-Policy":
+   								"frame-ancestors 'self' https://takeprofit.com",
+   						});
+   						res.end(content404, "utf-8");
+   					}
+   				);
+   			} else {
+   				res.writeHead(500);
+   				res.end(`Server Error: ${error.code}`);
+   			}
+   		} else {
+   			res.writeHead(200, {
+   				"Content-Type": contentType,
+   				"X-Frame-Options": "ALLOW-FROM https://takeprofit.com",
+   				"Content-Security-Policy":
+   					"frame-ancestors 'self' https://takeprofit.com",
+   			});
+   			res.end(content, "utf-8");
+   		}
+   	});
+   });
+
+   server.listen(PORT, () => {
+   	console.log(`Server running at http://localhost:${PORT}/`);
+   });
+   ```
+
+   **Explanation:**
+
+   - The server serves files from the `src` directory.
+   - Sets `X-Frame-Options` and `Content-Security-Policy` headers to allow embedding only from `https://takeprofit.com`.
+   - Handles 404 errors with a custom `404.html` page (create this file if desired).
+
+3. **Create a `404.html` Page (Optional)**
+
+   ```html
+   <!-- src/404.html -->
+   <!doctype html>
+   <html lang="en">
+   	<head>
+   		<meta charset="UTF-8" />
+   		<title>404 Not Found</title>
+   		<style>
+   			body {
+   				display: flex;
+   				justify-content: center;
+   				align-items: center;
+   				height: 100vh;
+   				background-color: #f8f8f8;
+   				font-family: Arial, sans-serif;
+   			}
+   			h1 {
+   				color: #333;
+   			}
+   		</style>
+   	</head>
+   	<body>
+   		<h1>404 - Page Not Found</h1>
+   	</body>
+   </html>
+   ```
+
+4. **Start the Server**
+
+   Run the server to serve your widget with the configured headers:
+
+   ```bash
+   node server.js
+   ```
+
+   Your widget will be accessible at `http://localhost:8080`.
+
+---
+
+## Initialize the SDK
+
+1. **Modify `app.js` to Initialize the SDK**
+
+   Open `src/app.js` and add the following code:
+
+   ```javascript
+   // src/app.js
+
+   // Ensure the SDK is available globally
+   const { TPWidgetSDK } = window;
+
+   // Initialize the SDK when the widget loads
+   function initializeSDK() {
+   	TPWidgetSDK.connect();
+   	TPWidgetSDK.hideLoader();
+
+   	// Subscribe to widget state changes
+   	TPWidgetSDK.subscribeWidgetChange((newState) => {
+   		console.log("Widget state updated:", newState);
+   	});
+
+   	// Subscribe to channel state changes
+   	TPWidgetSDK.subscribeChannelChange((newChannel) => {
+   		console.log("Channel state updated:", newChannel);
+   	});
+   }
+
+   // Cleanup the SDK when the widget unloads
+   function cleanupSDK() {
+   	TPWidgetSDK.disconnect();
+   }
+
+   window.addEventListener("load", initializeSDK);
+   window.addEventListener("beforeunload", cleanupSDK);
+   ```
+
+   **Explanation:**
+
+   - **`initializeSDK`**: Connects to the TakeProfit platform and hides the loader. Subscribes to widget and channel state changes.
+   - **`cleanupSDK`**: Disconnects from the SDK when the widget is unloaded.
+
+---
+
+## Create the Widget UI
+
+1. **Update `index.html` with Interactive Elements**
+
+   Ensure your `index.html` includes buttons to interact with the SDK:
+
+   ```html
+   <!-- src/index.html -->
+   <!doctype html>
+   <html lang="en">
+   	<head>
+   		<meta charset="UTF-8" />
+   		<meta
+   			http-equiv="X-UA-Compatible"
+   			content="IE=edge"
+   		/>
+   		<meta
+   			name="viewport"
+   			content="width=device-width, initial-scale=1.0"
+   		/>
+   		<title>TakeProfit Widget</title>
+   		<link
+   			rel="stylesheet"
+   			href="styles.css"
+   		/>
+   		<!-- Include TakeProfit Widget SDK -->
+   		<script src="https://cdn.jsdelivr.net/npm/takeprofit-widget-sdk@0.2.3/dist/tp-widget-sdk.min.js"></script>
+   	</head>
+   	<body>
+   		<div id="widget">
+   			<h1>TakeProfit Widget</h1>
+   			<p>Welcome to your first TakeProfit widget!</p>
+   			<button id="setAAPL">Set Security to AAPL</button>
+   			<button id="setMETA">Set Security to META</button>
+   			<div
+   				id="menu-actions"
+   				style="margin-top: 20px;"
+   			>
+   				<button id="addMenuItem">Add Refresh Data Menu Item</button>
+   				<button
+   					id="updateMenuItem"
+   					disabled
+   				>
+   					Update Menu Item
+   				</button>
+   				<button
+   					id="removeMenuItem"
+   					disabled
+   				>
+   					Remove Menu Item
+   				</button>
+   			</div>
+   		</div>
+   		<script src="app.js"></script>
+   	</body>
+   </html>
+   ```
+
+2. **Style the Widget with `styles.css`**
+
+   Add basic styling to `src/styles.css`:
+
+   ```css
+   /* src/styles.css */
+
+   body {
+   	display: flex;
+   	justify-content: center;
+   	align-items: center;
+   	height: 100vh;
+   	margin: 0;
+   	background-color: #f0f2f5;
+   	font-family: Arial, sans-serif;
+   }
+
+   #widget {
+   	background-color: #fff;
+   	padding: 20px;
+   	border-radius: 8px;
+   	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   	text-align: center;
+   	width: 300px;
+   }
+
+   button {
+   	margin: 10px;
+   	padding: 10px 20px;
+   	font-size: 16px;
+   	cursor: pointer;
+   	border: none;
+   	border-radius: 4px;
+   	background-color: #0070f3;
+   	color: #fff;
+   	transition: background-color 0.3s ease;
+   }
+
+   button:hover {
+   	background-color: #005bb5;
+   }
+
+   button:disabled {
+   	background-color: #cccccc;
+   	cursor: not-allowed;
+   }
+   ```
+
+   **Explanation:**
+
+   - Centers the widget on the page.
+   - Styles buttons for better user experience.
+
+---
+
+## Manage Widget State and Interactions
+
+1. **Update `app.js` to Handle Button Clicks**
+
+   Enhance `src/app.js` to handle interactions:
+
+   ```javascript
+   // src/app.js
+
+   // Ensure the SDK is available globally
+   const { TPWidgetSDK } = window;
+
+   // Initialize the SDK when the widget loads
+   function initializeSDK() {
+   	TPWidgetSDK.connect();
+   	TPWidgetSDK.hideLoader();
+
+   	// Subscribe to widget state changes
+   	TPWidgetSDK.subscribeWidgetChange((newState) => {
+   		console.log("Widget state updated:", newState);
+   	});
+
+   	// Subscribe to channel state changes
+   	TPWidgetSDK.subscribeChannelChange((newChannel) => {
+   		console.log("Channel state updated:", newChannel);
+   	});
+
+   	// Set up button event listeners
+   	document.getElementById("setAAPL").addEventListener("click", () => {
+   		changeSecurity("AAPL;BATS");
+   	});
+
+   	document.getElementById("setMETA").addEventListener("click", () => {
+   		changeSecurity("META;BATS");
+   	});
+
+   	document
+   		.getElementById("addMenuItem")
+   		.addEventListener("click", addMenuItem);
+   	document
+   		.getElementById("updateMenuItem")
+   		.addEventListener("click", updateMenuItem);
+   	document
+   		.getElementById("removeMenuItem")
+   		.addEventListener("click", removeMenuItem);
+   }
+
+   // Cleanup the SDK when the widget unloads
+   function cleanupSDK() {
+   	TPWidgetSDK.disconnect();
+   }
+
+   window.addEventListener("load", initializeSDK);
+   window.addEventListener("beforeunload", cleanupSDK);
+
+   // Function to change the security being viewed
+   function changeSecurity(securityID) {
+   	TPWidgetSDK.requestChangeSecurity(securityID, (result) => {
+   		if (result.payload.isSuccessful) {
+   			console.log(`Security successfully changed to ${securityID}.`);
+   		} else {
+   			console.error(`Failed to change security: ${result.payload.error}`);
+   		}
+   	});
+   }
+
+   // Function to add a menu item
+   async function addMenuItem() {
+   	try {
+   		const menuItemId = await TPWidgetSDK.addMenuItem(
+   			"Refresh Data",
+   			() => {
+   				console.log("Refresh Data menu item clicked.");
+   				// Implement refresh logic here
+   			},
+   			false
+   		);
+   		console.log(`Menu item added with ID: ${menuItemId}`);
+   		// Enable update and remove buttons
+   		document.getElementById("updateMenuItem").disabled = false;
+   		document.getElementById("removeMenuItem").disabled = false;
+   	} catch (error) {
+   		console.error("Failed to add menu item:", error);
+   	}
+   }
+
+   // Function to update a menu item
+   async function updateMenuItem() {
+   	try {
+   		const success = await TPWidgetSDK.updateMenuItem(
+   			1,
+   			false,
+   			"Refresh Data (Updated)"
+   		);
+   		if (success) {
+   			console.log("Menu item updated successfully.");
+   		}
+   	} catch (error) {
+   		console.error("Failed to update menu item:", error);
+   	}
+   }
+
+   // Function to remove a menu item
+   async function removeMenuItem() {
+   	try {
+   		const success = await TPWidgetSDK.removeMenuItem(1);
+   		if (success) {
+   			console.log("Menu item removed successfully.");
+   			// Disable update and remove buttons
+   			document.getElementById("updateMenuItem").disabled = true;
+   			document.getElementById("removeMenuItem").disabled = true;
+   		}
+   	} catch (error) {
+   		console.error("Failed to remove menu item:", error);
+   	}
+   }
+   ```
+
+   **Important Corrections:**
+
+   - **Conditional Checks**: Updated `if (result.isSuccessful)` to `if (result.payload.isSuccessful)` to correctly access the `isSuccessful` property within the `payload`.
+   - **Error Messages**: Updated `${result.error}` to `${result.payload.error}` to correctly access the `error` message within the `payload`.
+
+   **Explanation:**
+
+   - **Button Event Listeners**: Adds event listeners to handle user interactions.
+   - **Security Change**: Changes the displayed security to AAPL or META.
+   - **Menu Items**: Functions to add, update, and remove a "Refresh Data" menu item. Enables or disables update/remove buttons based on the menu item's state.
+
+---
+
+## Add Menu Items
+
+1. **Implement Menu Item Functions in `app.js`**
+
+   The menu item functions are already implemented in Step 6. Here's a recap:
+
+   - **Add Menu Item**
+
+     ```javascript
+     async function addMenuItem() {
+     	try {
+     		const menuItemId = await TPWidgetSDK.addMenuItem(
+     			"Refresh Data",
+     			() => {
+     				console.log("Refresh Data menu item clicked.");
+     				// Implement refresh logic here
+     			},
+     			false
+     		);
+     		console.log(`Menu item added with ID: ${menuItemId}`);
+     		// Enable update and remove buttons
+     		document.getElementById("updateMenuItem").disabled = false;
+     		document.getElementById("removeMenuItem").disabled = false;
+     	} catch (error) {
+     		console.error("Failed to add menu item:", error);
+     	}
+     }
+     ```
+
+   - **Update Menu Item**
+
+     ```javascript
+     async function updateMenuItem() {
+     	try {
+     		const success = await TPWidgetSDK.updateMenuItem(
+     			1,
+     			false,
+     			"Refresh Data (Updated)"
+     		);
+     		if (success) {
+     			console.log("Menu item updated successfully.");
+     		}
+     	} catch (error) {
+     		console.error("Failed to update menu item:", error);
+     	}
+     }
+     ```
+
+   - **Remove Menu Item**
+
+     ```javascript
+     async function removeMenuItem() {
+     	try {
+     		const success = await TPWidgetSDK.removeMenuItem(1);
+     		if (success) {
+     			console.log("Menu item removed successfully.");
+     			// Disable update and remove buttons
+     			document.getElementById("updateMenuItem").disabled = true;
+     			document.getElementById("removeMenuItem").disabled = true;
+     		}
+     	} catch (error) {
+     		console.error("Failed to remove menu item:", error);
+     	}
+     }
+     ```
+
+   **Explanation:**
+
+   - **Add Menu Item**: Adds a new menu item labeled "Refresh Data". Upon successful addition, enables the update and remove buttons.
+   - **Update Menu Item**: Updates the existing menu item's label.
+   - **Remove Menu Item**: Removes the menu item and disables the update and remove buttons.
+
+---
+
+## Test Your Widget Locally
+
+1. **Start the Server**
+
+   Ensure your server is running to serve the widget with the configured headers:
+
+   ```bash
+   node server.js
+   ```
+
+   Your widget will be accessible at `http://localhost:8080`.
+
+2. **Configure Local Storage for Testing**
+
+   To simulate the widget's presence on the TakeProfit platform, configure local storage in your browser:
+
+   - **Open the TakeProfit Platform**: Navigate to the TakeProfit platform in your browser.
+   - **Open Developer Console**: Press `F12` or `Ctrl+Shift+I` to open the developer tools.
+   - **Set Local Storage Entry**:
+
+     ```javascript
+     localStorage.setItem(
+     	"takeprofit.integrations.third_party_widget_options",
+     	JSON.stringify([
+     		{
+     			iframeUrl: "http://localhost:8080", // Your widget's URL
+     			enableChannelSupport: false, // Set to true if your widget supports channels
+     			title: "Vanilla JS Widget",
+     			imageUrl: "https://example.com/icon.png", // Replace with your widget icon URL
+     		},
+     	])
+     );
+     ```
+
+     **Note**:
+
+     - Replace `'http://localhost:8080'` with your actual widget URL if different.
+     - Provide a valid `imageUrl` for the widget icon.
+
+3. **Reload the TakeProfit Platform**
+
+   Refresh the TakeProfit platform page. Your Vanilla JavaScript widget should now appear in the widget panel, allowing you to add it to the dashboard and interact with its functionalities.
+
+4. **Verify Functionality**
+
+   - **Security Change**: Click on the "Set Security" buttons and observe the console logs for successful changes.
+   - **Menu Items**: Add the "Refresh Data" menu item and click it to see the corresponding console log. Test updating and removing the menu item to ensure they function as expected.
+
+---
+
+## Deploy Your Widget
+
+Once testing is successful, deploy your widget to a live environment.
+
+1. **Choose a Hosting Service**
+
+   Select a hosting service that can serve static files and supports custom HTTP headers. Some popular options include:
+
+   - **Netlify**
+   - **Vercel**
+   - **GitHub Pages**
+   - **AWS S3 with CloudFront**
+
+2. **Prepare Your Files for Deployment**
+
+   Ensure all your files (`index.html`, `styles.css`, `app.js`, etc.) are correctly set up and that your server configuration (`server.js`) is compatible with your hosting service. Some hosting services like Netlify and Vercel handle headers via configuration files.
+
+3. **Deploy to Netlify (Example)**
+
+   Here's how to deploy your widget to Netlify with the necessary headers:
+
+   - **Create a `netlify.toml` File**
+
+     ```toml
+     # netlify.toml
+     [[redirects]]
+       from = "/*"
+       to = "/index.html"
+       status = 200
+
+     [[headers]]
+       for = "/*"
+       [headers.values]
+         X-Frame-Options = "ALLOW-FROM https://takeprofit.com"
+         Content-Security-Policy = "frame-ancestors 'self' https://takeprofit.com"
+     ```
+
+   - **Deploy via Netlify CLI or Git Integration**
+
+     - **Using Git Integration**:
+
+       - Push your project to a Git repository (GitHub, GitLab, etc.).
+       - Connect your repository to Netlify through the Netlify dashboard.
+       - Netlify will automatically build and deploy your site based on the `netlify.toml` configuration.
+
+     - **Using Netlify CLI**:
+
+       - Install Netlify CLI:
+
+         ```bash
+         npm install -g netlify-cli
+         ```
+
+       - Deploy:
+
+         ```bash
+         netlify deploy --prod
+         ```
+
+4. **Update Local Storage Configuration**
+
+   After deployment, update the `iframeUrl` in the TakeProfit platform's local storage to point to your deployed widget's URL:
+
+   ```javascript
+   localStorage.setItem(
+   	"takeprofit.integrations.third_party_widget_options",
+   	JSON.stringify([
+   		{
+   			iframeUrl: "https://yourdomain.com", // Your deployed widget's URL
+   			enableChannelSupport: false,
+   			title: "Vanilla JS Widget",
+   			imageUrl: "https://yourdomain.com/icon.png", // Your widget's icon URL
+   		},
+   	])
+   );
+   ```
+
+5. **Final Testing**
+
+   Reload the TakeProfit platform and verify that your deployed widget functions correctly in the live environment. Test all functionalities, including security changes and menu item interactions, to ensure seamless integration.
+
+---
+
+## Best Practices
+
+- **Secure Communication**: Always serve your widget over HTTPS to ensure secure communication with the TakeProfit platform.
+- **Unique Identifiers**: Ensure that `requestId` and `menuItemId` are unique to prevent conflicts.
+- **Subscription Management**: Always unsubscribe from state changes when they're no longer needed to prevent memory leaks.
+
+  ```javascript
+  // Example: Unsubscribing from widget state changes
+  function initializeSDK() {
+  	TPWidgetSDK.connect();
+  	TPWidgetSDK.hideLoader();
+
+  	const handleWidgetChange = (newState) => {
+  		console.log("Widget state updated:", newState);
+  	};
+  	TPWidgetSDK.subscribeWidgetChange(handleWidgetChange);
+
+  	window.addEventListener("beforeunload", () => {
+  		TPWidgetSDK.unsubscribeWidgetChange(handleWidgetChange);
+  		TPWidgetSDK.disconnect();
+  	});
+  }
+  ```
+
+- **Error Handling**: Implement robust error handling for all asynchronous operations to enhance user experience.
+
+  ```javascript
+  async function addMenuItem() {
+  	try {
+  		const menuItemId = await TPWidgetSDK.addMenuItem(
+  			"Refresh Data",
+  			() => {
+  				console.log("Refresh Data menu item clicked.");
+  				// Implement refresh logic here
+  			},
+  			false
+  		);
+  		console.log(`Menu item added with ID: ${menuItemId}`);
+  		// Enable update and remove buttons
+  		document.getElementById("updateMenuItem").disabled = false;
+  		document.getElementById("removeMenuItem").disabled = false;
+  	} catch (error) {
+  		console.error("Failed to add menu item:", error);
+  	}
+  }
+  ```
+
+- **Performance Optimization**: Limit the number of active subscriptions and avoid unnecessary state updates to maintain optimal performance.
+- **Code Documentation**: Keep your code well-documented to facilitate maintenance and future enhancements.
+- **Responsive Design**: Ensure your widget is responsive and functions seamlessly across different devices and screen sizes.
+
+---
+
+## Next Steps
+
+Congratulations! You've successfully created and integrated your first widget using **Vanilla JavaScript** and the **TakeProfit Widget SDK** (version **0.2.3**). To further enhance your widget, consider the following:
+
+- **Explore Advanced SDK Features**: Refer to the [SDK Reference](/sdk/reference) to utilize all available methods and message types.
+- **Implement Real-Time Data**: Integrate real-time data feeds to provide dynamic and up-to-date information within your widget.
+- **Customize the UI**: Enhance the user interface with additional HTML elements and CSS styling to improve user engagement.
+- **Add More Interactions**: Implement more interactive features like custom events, notifications, and user preferences.
+- **Optimize**: Ensure your widget is responsive and functions seamlessly across different devices and screen sizes.
+- **Security Enhancements**: Implement additional security measures to safeguard data and ensure secure communication.
+
+For comprehensive details, refer to the [SDK Reference](/sdk/reference) and other documentation resources provided by the TakeProfit Widget SDK.
+
+---
+
+## Troubleshooting
+
+If you encounter issues while setting up or using the TakeProfit Widget SDK, consider the following solutions:
+
+1. **SDK Not Connecting**
+
+   - **Check Origins**: Ensure that your widget's domain is allowed and matches the trusted origins (`takeprofit.com`).
+   - **Network Issues**: Verify that there are no network restrictions or firewall rules blocking communication.
+
+2. **Menu Items Not Appearing**
+
+   - **Local Storage Configuration**: Double-check the `iframeUrl` and ensure it points to the correct widget URL.
+   - **SDK Initialization**: Ensure that `TPWidgetSDK.connect()` and `TPWidgetSDK.hideLoader()` are called successfully.
+
+3. **Security Change Fails**
+
+   - **Valid Security ID**: Ensure that the `securityID` you are requesting is valid and recognized by the platform.
+   - **Error Handling**: Check the console for error messages to understand why the request failed.
+
+4. **Unhandled Promise Rejections**
+
+   - **Implement `.catch` Blocks**: Ensure that all asynchronous SDK methods have proper error handling using `.catch` to manage rejected promises.
+
+5. **Performance Issues**
+
+   - **Optimize Subscriptions**: Limit the number of active subscriptions and avoid unnecessary state updates.
+   - **Efficient Rendering**: Ensure that your JavaScript code is optimized to prevent unnecessary operations.
+
+For persistent issues, refer to the [Support and Resources](#additional-resources) section or contact the support team for assistance.
+
+---
+
+## Additional Resources
+
+- **[Installation Guide](/sdk/installation)**: Detailed instructions for installing the SDK.
+- **[SDK Reference](/sdk/reference)**: Comprehensive documentation of all available methods, interfaces, and message types.
+- **[Creating Your First Widget](/sdk/first-widget)**: A practical guide to building and testing a basic widget.
+- **[JavaScript Documentation](https://developer.mozilla.org/en-US/docs/Web/JavaScript)**: Official JavaScript documentation for deeper understanding.
+- **[Content Security Policy (CSP) Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)**: Learn more about CSP for enhancing security.
+- **[HTTP Headers Documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers)**: Understand various HTTP headers for better configuration.

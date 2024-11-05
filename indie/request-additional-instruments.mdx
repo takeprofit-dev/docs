@@ -1,0 +1,63 @@
+---
+title: Request additional instruments
+---
+
+An indicator written in Indie is executed after it is added to a candle chart. The symbol and time frame of the
+instrument of that chart is the main indicator instrument which is bound to the `Main` context of the indicator. It is
+possible to request additional instrument data in indicator. For that purpose there are `@sec_context` decorator and
+`indie.SecContext` class in combination with `Context.calc_on()` function.
+
+# `@sec_context()` and `Context.calc_on()`
+
+Decorator `@sec_context` is a syntactic sugar that can be applied to a function definition which is an equivalent of
+writing a class inherited from `indie.SecContext` (more about the mechanics how this works can be found
+[here](https://dev.test.tpinf.in/docs/indie/How-Indies-syntactic-sugar-works#functions-decorated-with-sec_context)). The
+body of such a decorated function becomes an entry point for calculation when a data update is occurred on the
+corresponding additional instrument. Function call of `Context.calc_on` creates a connection between the `Main` context
+and the secondary one.
+
+Here is an example of an indicator that requests one additional instrument:
+
+```py
+# indie:lang_version = 4
+from indie import indicator, MainContext, sec_context, param
+
+@sec_context
+def SecMain(self):
+    return self.high[0], self.low[0]
+
+@indicator('Minimal calc_on example', overlay_main_pane=True)
+@param.time_frame('sec_time_frame', default='1D')
+class Main(MainContext):
+    def __init__(self, sec_time_frame):
+        self._sec_high, self._sec_low = self.calc_on(SecMain, time_frame=sec_time_frame)
+
+    def calc(self):
+        return self._sec_high[0], self._sec_low[0]
+```
+
+NOTE: It is required that `Context.calc_on` function is called from `__init__` constructor method of a main or secondary
+context.
+
+![Figure 9.1. Minimal Context.calc_on() and @sec_context example.](/images/indie/Standard-library/calc_on_example.png)
+
+If this indicator is added on a AAPL 15m chart it will draw two blue lines showing daily prices of the AAPL symbol.
+There are two instrument contexts in this indicator:
+
+- main context `Main` which is executed every time a data update on the main instrument AAPL 15m happens and
+- secondary context `SecMain` which is executed every time a data update on the secondary instrument AAPL 1D happens.
+
+Function [`Context.calc_on`](Library-reference#func_Context_calc_on) has more parameters besides `sec_context` and `time_frame`. Here is its signature:
+
+```txt
+Context.calc_on(
+    sec_context: typing.Type[indie.SecContext],
+    exchange: indie.Optional[str] = None,
+    ticker: indie.Optional[str] = None,
+    time_frame: indie.Optional[indie.TimeFrame] = None,
+    lookahead: bool = False
+) -> indie.SeriesF | tuple[indie.SeriesF, ...]
+```
+
+If `exchange`, `ticker` and `time_frame` are not given, then the corresponding values are taken from the current
+instrument.
