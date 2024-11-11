@@ -1,0 +1,1452 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "TakeProfit Partner API",
+        "description": "TakeProfit Partner API documentation",
+        "version": "0.1-beta"
+    },
+    "servers": [
+        {
+            "url": "https://api.dev.tpinf.in",
+            "description": "Development environment"
+        },
+        {
+            "url": "https://api.takeprofit.com",
+            "description": "'Production environment'"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Partner API"
+        },
+        {
+            "name": "Credentials",
+            "description": "The Credentials API allows partners to authenticate and obtain access tokens required for accessing other secured endpoints. This documentation provides details on how to use the authentication endpoints, including request and response formats.\n\n## Overview\n\nThe Authentication API provides two primary endpoints:\n\n1. **Create Token**: Authenticates a partner using their API key and returns an access token and a refresh token.\n    \n2. **Refresh Token**: Generates a new access token using a valid refresh token."
+        },
+        {
+            "name": "Link",
+            "description": "The Link API allows partners to manage the linkage between their own securities and the securities provided by TakeProfit. This includes creating, retrieving, and deleting links between securities."
+        },
+        {
+            "name": "Reference API",
+            "description": "Set of APIs to get reference info such as exchanges, securities."
+        },
+        {
+            "name": "Marketdata API",
+            "description": "Set of APIs to get marketdata such as historical candles"
+        },
+        {
+            "name": "Widgets",
+            "description": "Describe how to use TakeProfit Backend API from Widgets.\n\nEach request to API must has 'accesstoken' header with valid JWT-token.\n\nDescribe here how to obtain JWT for widget."
+        }
+    ],
+    "paths": {
+        "/takeprofit.partner.external.auth.v1.AuthApi.Login": {
+            "post": {
+                "tags": [
+                    "Credentials"
+                ],
+                "summary": "Create Token",
+                "description": "Authenticates a partner using their API key.\n\n### Request Body\n\n- **api_key** (`string`, required): Your unique API key provided by TakeProfit.\n    \n\n### Response\n\n- **status**:\n    \n    - **code** (`integer`): Status code (`0` indicates success).\n        \n    - **message** (`string`): Status message.\n        \n    - **details** (`array`): Additional details.\n        \n- **access_token**:\n    \n    - **token** (`string`): JWT access token.\n        \n    - **valid_to_time** (`string`): Expiration time of the access token in ISO 8601 format.\n        \n- **refresh_token**:\n    \n    - **token** (`string`): JWT refresh token.\n        \n    - **valid_to_time** (`string`): Expiration time of the refresh token in ISO 8601 format.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "api_key": "YOUR_API_KEY_HERE"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "examples": {
+                                    "example-0": {
+                                        "summary": "Success",
+                                        "value": {
+                                            "status": {
+                                                "code": 0,
+                                                "message": "",
+                                                "details": []
+                                            },
+                                            "access_token": {
+                                                "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InR5cGUiOiJwYXJ0bmVyIn0sInBhcnRuZXIiOnsiY29kZSI6ImxpbWUifSwiaWF0IjoxNzMwMjkxMjQ1LCJleHAiOjE3MzAyOTMwNDV9.ClSI-DnXeWh3sVxc4HU8HBP4Y6GTho-I1G5WL_FK9qA2VTWzX0H220GGgLwaC2U8qK2RRMcgpGpnPBYtCU3VSA45G3ahut4QUDBI8H2m-VCy1V1OTERGFaMcV8YWr0CLwzWVcPVaxIIUy1f7fhsVYGMyztcAhF4VzNpdzyuMy9-vwztkL2DuZzvyDWkq8-ncPwP844dwiFIVGan6kBmR_r7zKchXT7Y7diqjQdm6wrYc4vM1daxDRKVDNDA1uQfvJjnoXQ5bLgVYjYAjzMyDGU0WLfVzcMCvb2IwLtWra1Jp19I5yLM5p5t3s_mZMn5UDdMaD9rYN9h6RH3iZXt8p-3aLEBXf-8FSYVS6qzze0ylqzqm9Z23V5mzzCrqvRWWjpEG7eZUq8uh6Te-kCX3XPgn9ZPPmYDup2cuF7Jw3VGI_Dr7NtG5p4pWk7ehuu9juutYIdfS3GhrC8LLriidg4gfL58Ep5L023EttM0KrIudGhBR4K2Glc2YVlnkyCXOe3JQngCLS6fMxZITvOa86_eDFkUkFEvJUCWntR3fq3qDuAwUgrAFwbdXRvRKi6f1hWoZvM1w2bIqRxaJZfcAbJ9EMIc5NmXuYvHlQDbqJsloqMZSqrzjJlXIzuBuh0_mI5NsLKT7-H7mjxiMDIGxIaelJwPXUq54TCMB61X38ws",
+                                                "valid_to_time": "2024-10-30T12:57:25Z"
+                                            },
+                                            "refresh_token": {
+                                                "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoIjp0cnVlLCJkYXRhIjp7InVzZXIiOnsidHlwZSI6InBhcnRuZXIifSwicGFydG5lciI6eyJjb2RlIjoibGltZSJ9fSwiaWF0IjoxNzMwMjkxMjQ1LCJleHAiOjE3MzAyOTg0NDV9.aRNVSPXnVZXDeA8kqUJO6yG3eJlzJGYsYYyJvrl7eVDN1Nep_ODwldeG360t-CZ4_LEC0t-L8b3PJ_mIteurm6WByvWDwydtoLbEq7Mku0HkjErCTFPr9gVn804UCfquu8CApBkXh0n-u7IVA6cH0PWlanKpcJRFDt4AnIBFJ-ofilN_-1DjG_v8Cos-qfDk89fASrfQtr5SP0wq2IwIS_TyJWZj48VAZoOLM65erBa-Aiiz0-bnol83gDeLYXBM6FMJkQPDhqs7uJuUA-0vGOCouBlIDvaEAmyPDFKmmFcrziAs4p8QidaTXK8x2ZJAvqNSqijknAF5ZR0amEaKVMtSoyEvx001tV9XlfQJBDlcjGVCr6d8hfiaRxB2Z7Anrsh_1c64vvBuQXxFg3Ho-fSB05hwBoq_wOYbAPBsMSBYqK43u2eeqW_DUstd8osMEymtkYNfWLCPbPtaUb9bLuZUOZGVUC8HKYA-A33wnPxPlSHzghAsDqhsz79thjIUkPZyZCSGmCUYoSc4wDDCA29JQEbLiDDLwSoEvVx5iHJqd9gsUQD2RK0DJnR97VHv1Bj5rN2oJZVRojNy-ha-qV7wVVbtsi_Dbulvu7pfc7xk7q8s-tl4l6LbH0so42mvX9jtAvmW-SOIx0C19ce0yR_5BQ7O0jLJ1u2E_nvOFAU",
+                                                "valid_to_time": "2024-10-30T14:27:25Z"
+                                            }
+                                        }
+                                    },
+                                    "example-1": {
+                                        "summary": "Unsuccessful",
+                                        "value": {
+                                            "status": {
+                                                "code": 7,
+                                                "message": "Invalid api_key",
+                                                "details": []
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/takeprofit.partner.external.auth.v1.AuthApi.Refresh": {
+            "post": {
+                "tags": [
+                    "Credentials"
+                ],
+                "summary": "Refresh Token",
+                "description": "Generates a new access token using a valid refresh token.\n\n### Request Body\n\n- **refresh_token** (`string`, required): A valid refresh token obtained from the Login endpoint.\n    \n\n### Response\n\n- **status**:\n    \n    - **code** (`integer`): Status code (`0` indicates success).\n        \n    - **message** (`string`): Status message.\n        \n    - **details** (`array`): Additional details.\n        \n- **access_token**:\n    \n    - **token** (`string`): New JWT access token.\n        \n    - **valid_to_time** (`string`): Expiration time of the new access token in ISO 8601 format.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "refresh_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoIjp0cnVlLCJkYXRhIjp7InVzZXIiOnsidHlwZSI6InBhcnRuZXIifSwicGFydG5lciI6eyJjb2RlIjoibGltZSJ9fSwiaWF0IjoxNzMwMjkxMjQ1LCJleHAiOjE3MzAyOTg0NDV9.aRNVSPXnVZXDeA8kqUJO6yG3eJlzJGYsYYyJvrl7eVDN1Nep_ODwldeG360t-CZ4_LEC0t-L8b3PJ_mIteurm6WByvWDwydtoLbEq7Mku0HkjErCTFPr9gVn804UCfquu8CApBkXh0n-u7IVA6cH0PWlanKpcJRFDt4AnIBFJ-ofilN_-1DjG_v8Cos-qfDk89fASrfQtr5SP0wq2IwIS_TyJWZj48VAZoOLM65erBa-Aiiz0-bnol83gDeLYXBM6FMJkQPDhqs7uJuUA-0vGOCouBlIDvaEAmyPDFKmmFcrziAs4p8QidaTXK8x2ZJAvqNSqijknAF5ZR0amEaKVMtSoyEvx001tV9XlfQJBDlcjGVCr6d8hfiaRxB2Z7Anrsh_1c64vvBuQXxFg3Ho-fSB05hwBoq_wOYbAPBsMSBYqK43u2eeqW_DUstd8osMEymtkYNfWLCPbPtaUb9bLuZUOZGVUC8HKYA-A33wnPxPlSHzghAsDqhsz79thjIUkPZyZCSGmCUYoSc4wDDCA29JQEbLiDDLwSoEvVx5iHJqd9gsUQD2RK0DJnR97VHv1Bj5rN2oJZVRojNy-ha-qV7wVVbtsi_Dbulvu7pfc7xk7q8s-tl4l6LbH0so42mvX9jtAvmW-SOIx0C19ce0yR_5BQ7O0jLJ1u2E_nvOFAU"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "content-type": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "application/json"
+                                }
+                            },
+                            "grpc-accept-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity,deflate,gzip"
+                                }
+                            },
+                            "grpc-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity"
+                                }
+                            },
+                            "date": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "Wed, 30 Oct 2024 12:27:45 GMT"
+                                }
+                            },
+                            "x-envoy-upstream-service-time": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "8"
+                                }
+                            },
+                            "access-control-expose-headers": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "grpc-status, grpc-message, x-grpc-details, my-test"
+                                }
+                            },
+                            "my-little-header": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "my-test"
+                                }
+                            },
+                            "access-control-allow-origin": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "*"
+                                }
+                            },
+                            "grpc-status": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "0"
+                                }
+                            },
+                            "grpc-message": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "OK"
+                                }
+                            },
+                            "content-length": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "983"
+                                }
+                            },
+                            "server": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "envoy"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "status": {
+                                        "code": 0,
+                                        "message": "",
+                                        "details": []
+                                    },
+                                    "access_token": {
+                                        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InR5cGUiOiJwYXJ0bmVyIn0sInBhcnRuZXIiOnsiY29kZSI6ImxpbWUifSwiaWF0IjoxNzMwMjkxMjY1LCJleHAiOjE3MzIwOTEyNjV9.VRdxR-n3gIoL4vvnejJodOp8Idy4w-KUaP6tfSZZcHaoxLHbD6juGQfx2X57Gm08i1doUb4b3hJ0MNqGjIhzinPpOxYXmr860yT54ikScSrx00RHI0OPIWAEzi9wMnUAN_kA4J7CLWDiK7yslcxSuTHIRow-pvUDHvMyWPX33oaMpMwXllbX3jGOCqeI51ETldK9qSJBgRldFm_iM6bvHgtE1Fh3d36NqK2KJKZSdwO-4F1kZD0NpJ-t5opMUSPoWdy7vqfLfw9c2SZorr2xiiLyoPuL_89cwgYPccM9sXCzJpK4sa_4jC3UjmGHdHz7xcrG40KML8gMawbXgFerI8pZ4hXyUUnfsXlcIxWJO-nW7A-HP2xw6iu0JGa1NyYsyy-MclwKtSq-gY2h6gp9wRtc0ipwxQNGx3bnAVCwiaFqMoRigVOLu6KDWlRNjHUaq7geDpT1BqEBIzsPwIt3Qe_M0XXjlaUWU9UIfbFtHTgfx3UDyj2TbL_1hqC2704fcHWgiZe3xJDuc431AvSVO1FmKSoUDmU6neTzjQOovR4yDw9nDT3vPMKh2om0p-vRs5Qu4Sa-d0iUSQRUsTwepVHQeD1Xz180kvokelzZBb_0CP7Rqae8ZN5Ic5sbChnYNOhouPQ3mvsk5X6Fghp6Hj3t1thnmMA-2S7ceWqIhxs",
+                                        "valid_to_time": "2024-10-30T12:57:45Z"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/takeprofit.partner.external.security.v1.LinkApi.LinkSecurity": {
+            "post": {
+                "tags": [
+                    "Link"
+                ],
+                "summary": "Link Security",
+                "description": "Link a security to the partner's own security identifier. This will overwrite any existing link.\n\n### Request Body\n\n- `security_guid` (string, required): GUID of the security in TakeProfit system.\n    \n- `partner_security_id` (string, required): Partner's own identifier for the security.\n    \n\n### Response\n\n- `status`: Operation status.\n    \n\n---\n\n### Linked Security JSON Schema\n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"security_guid\": { \"type\": \"string\" },\n        \"partner_security_id\": { \"type\": \"string\" }\n    },\n    \"required\": [\"security_guid\", \"partner_security_id\"]\n}\n\n ```\n\n---\n\n## Frequently Asked Questions\n\n### Can I overwrite an existing link?\n\nYes, calling \\`LinkSecurity\\` with the same \\`security_guid\\` will overwrite the existing \\`partner_security_id\\`.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "security_guid": "6ef11658-5a1c-4baf-9387-d977dcca6129",
+                                    "partner_security_id": "124"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "accesstoken",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "JWT access token",
+                        "example": "YOUR_ACCESS_TOKEN_HERE"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "content-type": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "application/json"
+                                }
+                            },
+                            "grpc-accept-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity,deflate,gzip"
+                                }
+                            },
+                            "grpc-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity"
+                                }
+                            },
+                            "date": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "Mon, 11 Nov 2024 09:53:26 GMT"
+                                }
+                            },
+                            "x-envoy-upstream-service-time": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "73"
+                                }
+                            },
+                            "access-control-expose-headers": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "grpc-status, grpc-message, x-grpc-details, my-test"
+                                }
+                            },
+                            "my-little-header": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "my-test"
+                                }
+                            },
+                            "access-control-allow-origin": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "*"
+                                }
+                            },
+                            "grpc-status": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "0"
+                                }
+                            },
+                            "grpc-message": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "OK"
+                                }
+                            },
+                            "content-length": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "95"
+                                }
+                            },
+                            "server": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "envoy"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "status": {
+                                        "code": 0,
+                                        "message": "Security linked successfully.",
+                                        "details": []
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/takeprofit.partner.external.security.v1.LinkApi.UnlinkSecurity": {
+            "post": {
+                "tags": [
+                    "Link"
+                ],
+                "summary": "Unlink Security",
+                "description": "Remove the linkage between a security and the partner's identifier.\n\n### Request Body\n\n- `security_guid` (string, required): GUID of the security to unlink.\n    \n\n### Response\n\n- `status`: Operation status.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "security_guid": "6ef11658-5a1c-4baf-9387-d977dcca6129"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "accesstoken",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "JWT access token",
+                        "example": "YOUR_ACCESS_TOKEN_HERE"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "content-type": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "application/json"
+                                }
+                            },
+                            "grpc-accept-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity,deflate,gzip"
+                                }
+                            },
+                            "grpc-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity"
+                                }
+                            },
+                            "date": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "Mon, 11 Nov 2024 09:56:21 GMT"
+                                }
+                            },
+                            "x-envoy-upstream-service-time": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "62"
+                                }
+                            },
+                            "access-control-expose-headers": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "grpc-status, grpc-message, x-grpc-details, my-test"
+                                }
+                            },
+                            "my-little-header": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "my-test"
+                                }
+                            },
+                            "access-control-allow-origin": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "*"
+                                }
+                            },
+                            "grpc-status": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "0"
+                                }
+                            },
+                            "grpc-message": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "OK"
+                                }
+                            },
+                            "content-length": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "97"
+                                }
+                            },
+                            "server": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "envoy"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "status": {
+                                        "code": 0,
+                                        "message": "Security unlinked successfully.",
+                                        "details": []
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/takeprofit.partner.external.security.v1.LinkApi.ListLinkedSecurities": {
+            "post": {
+                "tags": [
+                    "Link"
+                ],
+                "summary": "List Linked Securities",
+                "description": "Retrieve a list of all securities linked by the partner.\n\n### Response\n\n- `status`: Operation status.\n    \n    - `code` (integer): Status code (`0` indicates success).\n        \n    - `message` (string): Status message.\n        \n    - `details` (array): Additional details.\n        \n- `linked_securities` (array): List of linked securities.\n    \n    - Each item contains:\n        \n        - `security_guid` (string): GUID of the security in TakeProfit system.\n            \n        - `partner_security_id` (string): Partner's own identifier for the security.\n            \n\n---\n\n## JSON Schemas\n\n#### Status\n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"code\": { \"type\": \"integer\" },\n        \"message\": { \"type\": \"string\" },\n        \"details\": { \"type\": \"array\", \"items\": {} }\n    },\n    \"required\": [\"code\", \"message\"]\n}\n\n ```\n\n#### Linked Security\n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"security_guid\": { \"type\": \"string\" },\n        \"partner_security_id\": { \"type\": \"string\" }\n    },\n    \"required\": [\"security_guid\", \"partner_security_id\"]\n}\n\n ```\n\n### List Linked Securities\n\n``` json\n{\n    \"type\": \"object\",\n    \"properties\": {\n        \"status\": { \"$ref\": \"#/definitions/Status\" },\n        \"linked_securities\": {\n            \"type\": \"array\",\n            \"items\": { \"$ref\": \"#/definitions/LinkedSecurity\" }\n        }\n    },\n    \"required\": [\"status\", \"linked_securities\"]\n}\n\n ```",
+                "requestBody": {
+                    "content": {}
+                },
+                "parameters": [
+                    {
+                        "name": "accesstoken",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "JWT access token",
+                        "example": "YOUR_ACCESS_TOKEN_HERE"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "content-type": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "application/json"
+                                }
+                            },
+                            "grpc-accept-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity,deflate,gzip"
+                                }
+                            },
+                            "grpc-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity"
+                                }
+                            },
+                            "date": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "Mon, 11 Nov 2024 10:07:53 GMT"
+                                }
+                            },
+                            "x-envoy-upstream-service-time": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "30"
+                                }
+                            },
+                            "access-control-expose-headers": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "grpc-status, grpc-message, x-grpc-details, my-test"
+                                }
+                            },
+                            "my-little-header": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "my-test"
+                                }
+                            },
+                            "access-control-allow-origin": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "*"
+                                }
+                            },
+                            "grpc-status": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "0"
+                                }
+                            },
+                            "grpc-message": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "OK"
+                                }
+                            },
+                            "content-length": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "194"
+                                }
+                            },
+                            "server": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "envoy"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "status": {
+                                        "code": 0,
+                                        "message": "",
+                                        "details": []
+                                    },
+                                    "linked_securities": [
+                                        {
+                                            "security_guid": "6ef11658-5a1c-4baf-9387-d977dcca6129",
+                                            "partner_security_id": "124"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/takeprofit.partner.external.security.v1.LinkApi.GetLinkedSecurity": {
+            "post": {
+                "tags": [
+                    "Link"
+                ],
+                "summary": "Get Linked Security",
+                "description": "Retrieve the linkage information for a specific security.\n\n### Request Body\n\n- `security_guid` (string, required): GUID of the security in TakeProfit system.\n    \n\n### Response\n\n- `status`: Operation status.\n    \n- `linked_security`: The linked security information.\n    \n    - `security_guid` (string): GUID of the security.\n        \n    - `partner_security_id` (string): Partner's identifier.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "security_guid": "6ef11658-5a1c-4baf-9387-d977dcca6129"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "accesstoken",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "JWT access token",
+                        "example": "YOUR_ACCESS_TOKEN_HERE"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "linked_security": {
+                                        "security_guid": "6ef11658-5a1c-4baf-9387-d977dcca6129",
+                                        "partner_security_id": "124"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/takeprofit.reference.external.security.v1.SecurityInfoApi.ListSecurities": {
+            "post": {
+                "tags": [
+                    "Reference API"
+                ],
+                "summary": "Security Info",
+                "description": "The `Security Info` method allows you to retrieve detailed information about multiple securities identified by ticker and exchange code or by GUID.\n\n### Request Body\n\n- `security_ids` (required): An array of security identifiers.\n    \n    Each element can contain one of the following options:\n    \n    - `ticker_code`:\n        \n        - `ticker` (string): The security's ticker symbol.\n            \n        - `exchange_code` (string): The exchange code.\n            \n    - `guid` (string): The security's Global Unique Identifier.\n        \n\n### Response\n\n- `securities`: An array of objects containing information about each requested security.\n    \n    - `status`:\n        \n        - `code` (integer): Operation status code (`0` - success).\n            \n        - `message` (string): Status message.\n            \n        - `details` (array): Additional details.\n            \n    - `security_id`: The security identifier corresponding to the request.\n        \n    - `security_info`: Detailed information about the security.\n        \n        - `ticker` (string): The security's ticker symbol.\n            \n        - `names` (map): Names in different languages.\n            \n        - `exchange_code` (string): The exchange code.\n            \n        - `cfi` (string): ISO 10962 (CFI) code.\n            \n        - `isin` (string): International Securities Identification Number (ISIN).\n            \n        - `status` (integer): Security status (1 - active).\n            \n        - `price_precision` (integer): Price precision (number of decimal places).\n            \n        - `tick_size`: Price tick size.\n            \n            - `value` (string): The value.\n                \n            - `scale` (string): The scale (divisor).\n                \n        - `asset_base`: Base asset.\n            \n            - `id`:\n                \n                - `code` (string): Asset code.\n                    \n                - `asset_class_code` (string): Asset class code.\n                    \n            - `icon_url` (string): URL of the asset's icon.\n                \n            - `background_color` (string): Background color.\n                \n            - `company`: Company information.\n                \n                - `name` (string): Company name.\n                    \n                - `industries` (array): Industries.\n                    \n        - `asset_quote`: Quote asset.\n            \n            - `id`:\n                \n                - `code` (string): Asset code.\n                    \n                - `asset_class_code` (string): Asset class code.\n                    \n        - `classes`: Security classes.\n            \n        - `guid` (string): Global Unique Identifier.\n            \n        - `exchange_alias` (string): Exchange alias.\n            \n        - `price_precisions`: Array of price precision settings for different ranges.\n            \n\n---\n\n## JSON Schemas\n\n### Request Schema\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"security_ids\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"oneOf\": [\n          {\n            \"type\": \"object\",\n            \"properties\": {\n              \"ticker_code\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"ticker\": { \"type\": \"string\" },\n                  \"exchange_code\": { \"type\": \"string\" }\n                },\n                \"required\": [\"ticker\", \"exchange_code\"]\n              }\n            },\n            \"required\": [\"ticker_code\"]\n          },\n          {\n            \"type\": \"object\",\n            \"properties\": {\n              \"guid\": { \"type\": \"string\" }\n            },\n            \"required\": [\"guid\"]\n          }\n        ]\n      }\n    }\n  },\n  \"required\": [\"security_ids\"]\n}\n\n ```\n\n### Response Schema\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"securities\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"status\": {\n            \"$ref\": \"#/definitions/Status\"\n          },\n          \"security_id\": {\n            \"$ref\": \"#/definitions/SecurityId\"\n          },\n          \"security_info\": {\n            \"$ref\": \"#/definitions/SecurityInfo\"\n          }\n        }\n      }\n    }\n  },\n  \"definitions\": {\n    \"Status\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"code\": { \"type\": \"integer\" },\n        \"message\": { \"type\": \"string\" },\n        \"details\": { \"type\": \"array\", \"items\": {} }\n      }\n    },\n    \"SecurityId\": {\n      \"oneOf\": [\n        {\n          \"type\": \"object\",\n          \"properties\": {\n            \"ticker_code\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"ticker\": { \"type\": \"string\" },\n                \"exchange_code\": { \"type\": \"string\" }\n              },\n              \"required\": [\"ticker\", \"exchange_code\"]\n            }\n          }\n        },\n        {\n          \"type\": \"object\",\n          \"properties\": {\n            \"guid\": { \"type\": \"string\" }\n          }\n        }\n      ]\n    },\n    \"SecurityInfo\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"ticker\": { \"type\": \"string\" },\n        \"names\": {\n          \"type\": \"object\",\n          \"additionalProperties\": { \"type\": \"string\" }\n        },\n        \"exchange_code\": { \"type\": \"string\" },\n        \"cfi\": { \"type\": \"string\" },\n        \"isin\": { \"type\": \"string\" },\n        \"status\": { \"type\": \"integer\" },\n        \"price_precision\": { \"type\": \"integer\" },\n        \"tick_size\": { \"$ref\": \"#/definitions/Decimal\" },\n        \"asset_base\": { \"$ref\": \"#/definitions/Asset\" },\n        \"asset_quote\": { \"$ref\": \"#/definitions/Asset\" },\n        \"classes\": {\n          \"type\": \"array\",\n          \"items\": { \"$ref\": \"#/definitions/SecurityClass\" }\n        },\n        \"guid\": { \"type\": \"string\" },\n        \"exchange_alias\": { \"type\": \"string\" },\n        \"price_precisions\": {\n          \"type\": \"array\",\n          \"items\": { \"$ref\": \"#/definitions/PricePrecision\" }\n        }\n      }\n    },\n    \"Decimal\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"value\": { \"type\": \"string\" },\n        \"scale\": { \"type\": \"string\" }\n      }\n    },\n    \"Asset\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"id\": { \"$ref\": \"#/definitions/AssetId\" },\n        \"icon_url\": { \"type\": \"string\" },\n        \"background_color\": { \"type\": \"string\" },\n        \"company\": { \"$ref\": \"#/definitions/Company\" }\n      }\n    },\n    \"AssetId\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"code\": { \"type\": \"string\" },\n        \"asset_class_code\": { \"type\": \"string\" }\n      }\n    },\n    \"Company\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"name\": { \"type\": \"string\" },\n        \"industries\": {\n          \"type\": \"array\",\n          \"items\": { \"$ref\": \"#/definitions/Industry\" }\n        }\n      }\n    },\n    \"Industry\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"name\": { \"type\": \"string\" },\n        \"industries\": {\n          \"type\": \"array\",\n          \"items\": {}\n        }\n      }\n    },\n    \"SecurityClass\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"name\": { \"type\": \"string\" },\n        \"parent_class\": { \"$ref\": \"#/definitions/SecurityClass\" },\n        \"top_level_class\": { \"$ref\": \"#/definitions/SecurityClass\" }\n      }\n    },\n    \"PricePrecision\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"price_from\": { \"$ref\": \"#/definitions/Decimal\" },\n        \"price_to\": { \"$ref\": \"#/definitions/Decimal\" },\n        \"precision\": { \"type\": \"integer\" }\n      }\n    }\n  }\n}\n\n ```\n\n---\n\n## Usage Recommendations\n\n- **Authorization**: Always use a valid `access_token` in the `accesstoken` header.\n    \n- **Error Handling**: Check the `status` field in the response to determine the success of the operation.\n    \n- **Identifiers**: Use `guid` for unique identification of securities when possible.\n    \n\n---\n\n## Frequently Asked Questions\n\n### What should I do if I receive an \"Invalid access token\" error?\n\nEnsure you are using a valid `access_token` obtained through the [Auth API](#). Tokens may expire, in which case you need to obtain a new one using the `refresh_token`.\n\n### Can I request information about a single security?\n\nYes, you can specify a single identifier in the `security_ids` array.\n\n### How can I get a list of available exchanges and their codes?\n\nRefer to the relevant documentation or API that provides information about exchanges.\n\n---\n\n## Additional Resources\n\n- [Auth API Documentation](#)\n    \n- [ISO 10962 (CFI)](https://en.wikipedia.org/wiki/ISO_10962)\n    \n- [ISO 6166 (ISIN)](https://en.wikipedia.org/wiki/International_Securities_Identification_Number)\n    \n\n---",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "security_ids": [
+                                        {
+                                            "ticker_code": {
+                                                "ticker": "TSLA",
+                                                "exchange_code": "BATS"
+                                            }
+                                        },
+                                        {
+                                            "ticker_code": {
+                                                "ticker": "AAPL",
+                                                "exchange_code": "BATS"
+                                            }
+                                        },
+                                        {
+                                            "ticker_code": {
+                                                "ticker": "ETH/USDT",
+                                                "exchange_code": "CXBNCE"
+                                            }
+                                        },
+                                        {
+                                            "ticker_code": {
+                                                "ticker": "BIT/USD",
+                                                "exchange_code": "CXKRKN"
+                                            }
+                                        },
+                                        {
+                                            "guid": "ca820109-b49a-4835-8422-96698eb65b53"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "accesstoken",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "JWT access token",
+                        "example": "YOUR_ACCESS_TOKEN_HERE"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "grpc-accept-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity,deflate,gzip"
+                                }
+                            },
+                            "grpc-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity"
+                                }
+                            },
+                            "content-type": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "application/json"
+                                }
+                            },
+                            "date": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "Wed, 06 Nov 2024 06:43:52 GMT"
+                                }
+                            },
+                            "x-envoy-upstream-service-time": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "6"
+                                }
+                            },
+                            "access-control-expose-headers": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "grpc-status, grpc-message, x-grpc-details, my-test"
+                                }
+                            },
+                            "my-little-header": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "my-test"
+                                }
+                            },
+                            "access-control-allow-origin": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "*"
+                                }
+                            },
+                            "grpc-status": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "0"
+                                }
+                            },
+                            "grpc-message": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "OK"
+                                }
+                            },
+                            "content-length": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "3350"
+                                }
+                            },
+                            "server": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "envoy"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "examples": {
+                                    "example-0": {
+                                        "summary": "BATS Security Info",
+                                        "value": {
+                                            "securities": [
+                                                {
+                                                    "status": {
+                                                        "code": 0,
+                                                        "message": "",
+                                                        "details": []
+                                                    },
+                                                    "security_id": {
+                                                        "ticker_code": {
+                                                            "ticker": "TSLA",
+                                                            "exchange_code": "BATS"
+                                                        }
+                                                    },
+                                                    "security_info": {
+                                                        "ticker": "TSLA",
+                                                        "names": {
+                                                            "en": "Tesla, Inc."
+                                                        },
+                                                        "exchange_code": "BATS",
+                                                        "cfi": "MMMXXX",
+                                                        "isin": "US88160R1014",
+                                                        "status": 1,
+                                                        "price_precision": 2,
+                                                        "tick_size": {
+                                                            "value": "1",
+                                                            "scale": "10000"
+                                                        },
+                                                        "asset_base": {
+                                                            "id": {
+                                                                "code": "TSLA",
+                                                                "asset_class_code": "EQUITY"
+                                                            },
+                                                            "icon_url": "https://cdn.takeprofit.team/reference/stage/icons/cl_tsla_15835_dark.svg",
+                                                            "background_color": "#ffffff",
+                                                            "company": {
+                                                                "name": "Tesla, Inc.",
+                                                                "industries": [
+                                                                    {
+                                                                        "name": "Motor Vehicles",
+                                                                        "industries": []
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        "asset_quote": {
+                                                            "id": {
+                                                                "code": "USD",
+                                                                "asset_class_code": "CURRENCY"
+                                                            }
+                                                        },
+                                                        "classes": [
+                                                            {
+                                                                "name": "Common stocks",
+                                                                "parent_class": {
+                                                                    "name": "Equity"
+                                                                },
+                                                                "top_level_class": {
+                                                                    "name": "Equity"
+                                                                }
+                                                            }
+                                                        ],
+                                                        "guid": "0e999ee4-f44f-4cb7-a769-6ac37e72f6db",
+                                                        "exchange_alias": "NASDAQ",
+                                                        "price_precisions": [
+                                                            {
+                                                                "price_from": {
+                                                                    "value": "0",
+                                                                    "scale": "0"
+                                                                },
+                                                                "price_to": {
+                                                                    "value": "1",
+                                                                    "scale": "0"
+                                                                },
+                                                                "precision": 4
+                                                            },
+                                                            {
+                                                                "price_from": {
+                                                                    "value": "1",
+                                                                    "scale": "0"
+                                                                },
+                                                                "precision": 2
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "status": {
+                                                        "code": 0,
+                                                        "message": "",
+                                                        "details": []
+                                                    },
+                                                    "security_id": {
+                                                        "ticker_code": {
+                                                            "ticker": "AAPL",
+                                                            "exchange_code": "BATS"
+                                                        }
+                                                    },
+                                                    "security_info": {
+                                                        "ticker": "AAPL",
+                                                        "names": {
+                                                            "en": "Apple Inc."
+                                                        },
+                                                        "exchange_code": "BATS",
+                                                        "cfi": "MMMXXX",
+                                                        "isin": "US0378331005",
+                                                        "status": 1,
+                                                        "price_precision": 2,
+                                                        "tick_size": {
+                                                            "value": "1",
+                                                            "scale": "10000"
+                                                        },
+                                                        "asset_base": {
+                                                            "id": {
+                                                                "code": "AAPL",
+                                                                "asset_class_code": "EQUITY"
+                                                            },
+                                                            "icon_url": "https://cdn.takeprofit.team/reference/stage/icons/cl_aapl_27246_bright.svg",
+                                                            "background_color": "#1D1D1F",
+                                                            "company": {
+                                                                "name": "Apple, Inc.",
+                                                                "industries": [
+                                                                    {
+                                                                        "name": "Telecommunications Equipment",
+                                                                        "industries": []
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        "asset_quote": {
+                                                            "id": {
+                                                                "code": "USD",
+                                                                "asset_class_code": "CURRENCY"
+                                                            }
+                                                        },
+                                                        "classes": [
+                                                            {
+                                                                "name": "Common stocks",
+                                                                "parent_class": {
+                                                                    "name": "Equity"
+                                                                },
+                                                                "top_level_class": {
+                                                                    "name": "Equity"
+                                                                }
+                                                            }
+                                                        ],
+                                                        "guid": "6ef11658-5a1c-4baf-9387-d977dcca6129",
+                                                        "exchange_alias": "NASDAQ",
+                                                        "price_precisions": [
+                                                            {
+                                                                "price_from": {
+                                                                    "value": "0",
+                                                                    "scale": "0"
+                                                                },
+                                                                "price_to": {
+                                                                    "value": "1",
+                                                                    "scale": "0"
+                                                                },
+                                                                "precision": 4
+                                                            },
+                                                            {
+                                                                "price_from": {
+                                                                    "value": "1",
+                                                                    "scale": "0"
+                                                                },
+                                                                "precision": 2
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "status": {
+                                                        "code": 5,
+                                                        "message": "NOT_FOUND",
+                                                        "details": []
+                                                    },
+                                                    "security_id": {
+                                                        "ticker_code": {
+                                                            "ticker": "XXXDF",
+                                                            "exchange_code": "BATS"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "example-1": {
+                                        "summary": "GUID Example",
+                                        "value": {
+                                            "securities": [
+                                                {
+                                                    "status": {
+                                                        "code": 0,
+                                                        "message": "",
+                                                        "details": []
+                                                    },
+                                                    "security_id": {
+                                                        "guid": "0e999ee4-f44f-4cb7-a769-6ac37e72f6db"
+                                                    },
+                                                    "security_info": {
+                                                        "ticker": "TSLA",
+                                                        "names": {
+                                                            "en": "Tesla, Inc."
+                                                        },
+                                                        "exchange_code": "BATS",
+                                                        "cfi": "MMMXXX",
+                                                        "isin": "US88160R1014",
+                                                        "status": 1,
+                                                        "price_precision": 2,
+                                                        "tick_size": {
+                                                            "value": "1",
+                                                            "scale": "10000"
+                                                        },
+                                                        "asset_base": {
+                                                            "id": {
+                                                                "code": "TSLA",
+                                                                "asset_class_code": "EQUITY"
+                                                            },
+                                                            "icon_url": "https://cdn.takeprofit.team/reference/stage/icons/cl_tsla_15835_dark.svg",
+                                                            "background_color": "#ffffff",
+                                                            "company": {
+                                                                "name": "Tesla, Inc.",
+                                                                "industries": [
+                                                                    {
+                                                                        "name": "Motor Vehicles",
+                                                                        "industries": []
+                                                                    }
+                                                                ]
+                                                            }
+                                                        },
+                                                        "asset_quote": {
+                                                            "id": {
+                                                                "code": "USD",
+                                                                "asset_class_code": "CURRENCY"
+                                                            }
+                                                        },
+                                                        "classes": [
+                                                            {
+                                                                "name": "Common stocks",
+                                                                "parent_class": {
+                                                                    "name": "Equity"
+                                                                },
+                                                                "top_level_class": {
+                                                                    "name": "Equity"
+                                                                }
+                                                            }
+                                                        ],
+                                                        "guid": "0e999ee4-f44f-4cb7-a769-6ac37e72f6db",
+                                                        "exchange_alias": "NASDAQ",
+                                                        "price_precisions": [
+                                                            {
+                                                                "price_from": {
+                                                                    "value": "0",
+                                                                    "scale": "0"
+                                                                },
+                                                                "price_to": {
+                                                                    "value": "1",
+                                                                    "scale": "0"
+                                                                },
+                                                                "precision": 4
+                                                            },
+                                                            {
+                                                                "price_from": {
+                                                                    "value": "1",
+                                                                    "scale": "0"
+                                                                },
+                                                                "precision": 2
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "example-2": {
+                                        "summary": "Crypto Security Info",
+                                        "value": {
+                                            "securities": [
+                                                {
+                                                    "status": {
+                                                        "code": 0,
+                                                        "message": "",
+                                                        "details": []
+                                                    },
+                                                    "security_id": {
+                                                        "ticker_code": {
+                                                            "ticker": "BTC/USDT",
+                                                            "exchange_code": "CXBNCE"
+                                                        }
+                                                    },
+                                                    "security_info": {
+                                                        "ticker": "BTC/USDT",
+                                                        "names": {
+                                                            "en": "Bitcoin / Tether USD "
+                                                        },
+                                                        "exchange_code": "CXBNCE",
+                                                        "cfi": "IFXXXC",
+                                                        "status": 1,
+                                                        "price_precision": 2,
+                                                        "tick_size": {
+                                                            "value": "1",
+                                                            "scale": "100"
+                                                        },
+                                                        "ticker_part_main": "BTC/USDT",
+                                                        "asset_base": {
+                                                            "id": {
+                                                                "code": "BTC",
+                                                                "asset_class_code": "CRYPTO"
+                                                            },
+                                                            "icon_url": "https://cdn.takeprofit.team/reference/dev/icons/asset_logo_2607.svg",
+                                                            "icon_base64": "PD94bWwgdmVyc2lvbj0iMS4wIiA/Pg0KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+DQoJPGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4NCgkJPHBhdGggZmlsbD0iI0ZGRiIgZmlsbC1ydWxlPSJub256ZXJvIiBkPSJNMjMuMTg5IDE0LjAyYy4zMTQtMi4wOTYtMS4yODMtMy4yMjMtMy40NjUtMy45NzVsLjcwOC0yLjg0LTEuNzI4LS40My0uNjkgMi43NjVjLS40NTQtLjExNC0uOTItLjIyLTEuMzg1LS4zMjZsLjY5NS0yLjc4M0wxNS41OTYgNmwtLjcwOCAyLjgzOWMtLjM3Ni0uMDg2LS43NDYtLjE3LTEuMTA0LS4yNmwuMDAyLS4wMDktMi4zODQtLjU5NS0uNDYgMS44NDZzMS4yODMuMjk0IDEuMjU2LjMxMmMuNy4xNzUuODI2LjYzOC44MDUgMS4wMDZsLS44MDYgMy4yMzVjLjA0OC4wMTIuMTEuMDMuMTguMDU3bC0uMTgzLS4wNDUtMS4xMyA0LjUzMmMtLjA4Ni4yMTItLjMwMy41MzEtLjc5My40MS4wMTguMDI1LTEuMjU2LS4zMTMtMS4yNTYtLjMxM2wtLjg1OCAxLjk3OCAyLjI1LjU2MWMuNDE4LjEwNS44MjguMjE1IDEuMjMxLjMxOGwtLjcxNSAyLjg3MiAxLjcyNy40My43MDgtMi44NGMuNDcyLjEyNy45My4yNDUgMS4zNzguMzU3bC0uNzA2IDIuODI4IDEuNzI4LjQzLjcxNS0yLjg2NmMyLjk0OC41NTggNS4xNjQuMzMzIDYuMDk3LTIuMzMzLjc1Mi0yLjE0Ni0uMDM3LTMuMzg1LTEuNTg4LTQuMTkyIDEuMTMtLjI2IDEuOTgtMS4wMDMgMi4yMDctMi41Mzh6bS0zLjk1IDUuNTM4Yy0uNTMzIDIuMTQ3LTQuMTQ4Ljk4Ni01LjMyLjY5NWwuOTUtMy44MDVjMS4xNzIuMjkzIDQuOTI5Ljg3MiA0LjM3IDMuMTF6bS41MzUtNS41NjljLS40ODcgMS45NTMtMy40OTUuOTYtNC40Ny43MTdsLjg2LTMuNDVjLjk3NS4yNDMgNC4xMTguNjk2IDMuNjEgMi43MzN6Ii8+DQoJPC9nPg0KPC9zdmc+DQo=",
+                                                            "background_color": "#F7931A"
+                                                        },
+                                                        "asset_quote": {
+                                                            "id": {
+                                                                "code": "USDT",
+                                                                "asset_class_code": "CRYPTO"
+                                                            },
+                                                            "icon_url": "https://cdn.takeprofit.team/reference/dev/icons/asset_logo_2630.svg",
+                                                            "icon_base64": "PD94bWwgdmVyc2lvbj0iMS4wIiA/Pg0KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+DQoJPGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4NCgkJPHBhdGggZmlsbD0iI0ZGRiIgZD0iTTE3LjkyMiAxNy4zODN2LS4wMDJjLS4xMS4wMDgtLjY3Ny4wNDItMS45NDIuMDQyLTEuMDEgMC0xLjcyMS0uMDMtMS45NzEtLjA0MnYuMDAzYy0zLjg4OC0uMTcxLTYuNzktLjg0OC02Ljc5LTEuNjU4IDAtLjgwOSAyLjkwMi0xLjQ4NiA2Ljc5LTEuNjZ2Mi42NDRjLjI1NC4wMTguOTgyLjA2MSAxLjk4OC4wNjEgMS4yMDcgMCAxLjgxMi0uMDUgMS45MjUtLjA2di0yLjY0M2MzLjg4LjE3MyA2Ljc3NS44NSA2Ljc3NSAxLjY1OCAwIC44MS0yLjg5NSAxLjQ4NS02Ljc3NSAxLjY1N20wLTMuNTl2LTIuMzY2aDUuNDE0VjcuODE5SDguNTk1djMuNjA4aDUuNDE0djIuMzY1Yy00LjQuMjAyLTcuNzA5IDEuMDc0LTcuNzA5IDIuMTE4IDAgMS4wNDQgMy4zMDkgMS45MTUgNy43MDkgMi4xMTh2Ny41ODJoMy45MTN2LTcuNTg0YzQuMzkzLS4yMDIgNy42OTQtMS4wNzMgNy42OTQtMi4xMTYgMC0xLjA0My0zLjMwMS0xLjkxNC03LjY5NC0yLjExNyIvPg0KCTwvZz4NCjwvc3ZnPg0K",
+                                                            "background_color": "#26A17B"
+                                                        },
+                                                        "classes": [
+                                                            {
+                                                                "name": "Spot",
+                                                                "parent_class": {
+                                                                    "name": "Crypto"
+                                                                },
+                                                                "top_level_class": {
+                                                                    "name": "Crypto"
+                                                                }
+                                                            }
+                                                        ],
+                                                        "guid": "8c0dd38e-e125-4024-aa5b-3f87b3aa575c",
+                                                        "exchange_alias": "BINANCE",
+                                                        "price_precisions": [
+                                                            {
+                                                                "price_from": {
+                                                                    "value": "0",
+                                                                    "scale": "0"
+                                                                },
+                                                                "precision": 2
+                                                            }
+                                                        ]
+                                                    }
+                                                },
+                                                {
+                                                    "status": {
+                                                        "code": 0,
+                                                        "message": "",
+                                                        "details": []
+                                                    },
+                                                    "security_id": {
+                                                        "ticker_code": {
+                                                            "ticker": "BIT/USD",
+                                                            "exchange_code": "CXKRKN"
+                                                        }
+                                                    },
+                                                    "security_info": {
+                                                        "ticker": "BIT/USD",
+                                                        "names": {
+                                                            "en": "BitDAO / USD"
+                                                        },
+                                                        "exchange_code": "CXKRKN",
+                                                        "cfi": "IFXXXC",
+                                                        "status": 1,
+                                                        "price_precision": 4,
+                                                        "tick_size": {
+                                                            "value": "1",
+                                                            "scale": "10000"
+                                                        },
+                                                        "asset_base": {
+                                                            "id": {
+                                                                "code": "BIT",
+                                                                "asset_class_code": "CRYPTO"
+                                                            },
+                                                            "icon_url": "https://cdn.takeprofit.team/reference/dev/icons/asset_logo_19862.svg",
+                                                            "icon_base64": "PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0ndXRmLTgnPz4NCjxzdmcgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPg0KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg4LDgpIj4NCiAgICA8c3ZnIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld2JveD0iMCAwIDUwMCA1MDAiPg0KICAgICAgPHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJiaXQiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgNTAwIDUwMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNTAwIDUwMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KICAgICAgICA8c3R5bGUgdHlwZT0idGV4dC9jc3MiPg0KCS5zdDB7ZmlsbDojRTY0MDcyO30NCjwvc3R5bGU+DQogICAgICA8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMjUxLjQsNTAwaC04Ni41Yy0xMC42LDAtMTkuMS04LjYtMTkuMS0xOS4xYzAtMTAuNiw4LjYtMTkuMSwxOS4xLTE5LjFoODYuNWM3Ny44LDAsMTQxLjEtNjMuMywxNDEuMS0xNDEuMSAgcy02My4zLTE0MS4xLTE0MS4xLTE0MS4xaC00Ni41Yy0xMC41LDAtMTkuMSw4LjYtMTkuMSwxOS4xczguNiwxOS4xLDE5LjEsMTkuMWg0NS4yYzU2LjYsMCwxMDIuNyw0Ni4xLDEwMi43LDEwMi43ICBjMCw1Ni42LTQ2LjEsMTAyLjctMTAyLjcsMTAyLjdIMTI0LjJjLTMwLjQsMC01NS4xLTI0LjctNTUuMS01NS4xVjE5LjFDNjkuMSw4LjYsNzcuNywwLDg4LjMsMHMxOS4xLDguNiwxOS4xLDE5LjF2MzQ4LjcgIGMwLDkuMyw3LjUsMTYuOCwxNi44LDE2LjhoMTI1LjljMzUuNSwwLDY0LjQtMjguOSw2NC40LTY0LjRzLTI4LjktNjQuNC02NC40LTY0LjRoLTQ1LjJjLTMxLjYsMC01Ny40LTI1LjctNTcuNC01Ny40ICBzMjUuNy01Ny40LDU3LjQtNTcuNGg0Ni41Yzk4LjksMCwxNzkuNCw4MC41LDE3OS40LDE3OS40UzM1MC40LDUwMCwyNTEuNCw1MDB6IiAvPg0KICAgICAgPC9zdmc+DQogICAgPC9zdmc+DQogIDwvZz4NCjwvc3ZnPg0K",
+                                                            "background_color": "#FFFFFF"
+                                                        },
+                                                        "asset_quote": {
+                                                            "id": {
+                                                                "code": "USD",
+                                                                "asset_class_code": "CURRENCY"
+                                                            }
+                                                        },
+                                                        "classes": [
+                                                            {
+                                                                "name": "Spot",
+                                                                "parent_class": {
+                                                                    "name": "Crypto"
+                                                                },
+                                                                "top_level_class": {
+                                                                    "name": "Crypto"
+                                                                }
+                                                            }
+                                                        ],
+                                                        "guid": "0dd8860a-bf6f-4f65-9860-3ee63ad4c5ad",
+                                                        "exchange_alias": "KRAKEN",
+                                                        "price_precisions": [
+                                                            {
+                                                                "price_from": {
+                                                                    "value": "0",
+                                                                    "scale": "0"
+                                                                },
+                                                                "precision": 4
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/takeprofit.marketdata.external.candle.v1.CandleHistoryApi.ListCandles": {
+            "post": {
+                "tags": [
+                    "Marketdata API"
+                ],
+                "summary": "List Candles",
+                "description": "The `ListCandles` method retrieves historical candlestick data for a given security, time frame, and range. This documentation provides details on how to use the `ListCandles` endpoint, including request and response formats, and includes JSON schemas for the request and response.\n\n### Request Body\n\n- `security_id` (object, required): Identifier of the security.\n    \n    - One of:\n        \n        - `guid` (string): Global Unique Identifier of the security.\n            \n        - `ticker_code` (object):\n            \n            - `ticker` (string): Ticker symbol.\n                \n            - `exchange_code` (string): Exchange code.\n                \n- `time_frame` (object, required): Time frame for the candles.\n    \n    - `time_unit` (string, required): Unit of time. Possible values: `MINUTE`, `HOUR`, `DAY`, `WEEK`, `MONTH`, `QUARTER`, `YEAR`.\n        \n    - `count` (integer): Number of `time_unit`s per candle (e.g., 1 for daily candles).\n        \n- `range` (object, required): Range of the historical data.\n    \n    - One of:\n        \n        - `first_bound_time` (string): The starting time (ISO 8601 format).\n            \n        - `second_bound_time` (string): The ending time (ISO 8601 format).\n            \n        - `duration` (string): Duration of the range (e.g., `\"PT5H\"` for 5 hours).\n            \n        - `count` (integer): Number of candles to retrieve. Negative for past data relative to `first_bound_time`.\n            \n\n### Response\n\n- `candles` (array): An array of candle objects.\n    \n    - Each candle object contains:\n        \n        - `time` (string): The start time of the candle in ISO 8601 format.\n            \n        - `open` (object): Open price.\n            \n            - `value` (string): Numeric value as a string.\n                \n            - `scale` (string): Scale factor (divisor).\n                \n        - `high` (object): High price.\n            \n        - `low` (object): Low price.\n            \n        - `close` (object): Close price.\n            \n        - `volume` (object): Volume.\n            \n        - `session_type` (integer): Session type (e.g., 0 for MAINSESSION).\n            \n\n---\n\n## JSON Schemas\n\n### Request Schema\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"security_id\": {\n      \"type\": \"object\",\n      \"oneOf\": [\n        {\n          \"properties\": {\n            \"guid\": {\n              \"type\": \"string\"\n            }\n          },\n          \"required\": [\"guid\"]\n        },\n        {\n          \"properties\": {\n            \"ticker_code\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"ticker\": {\n                  \"type\": \"string\"\n                },\n                \"exchange_code\": {\n                  \"type\": \"string\"\n                }\n              },\n              \"required\": [\"ticker\", \"exchange_code\"]\n            }\n          },\n          \"required\": [\"ticker_code\"]\n        }\n      ]\n    },\n    \"time_frame\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"time_unit\": {\n          \"type\": \"string\",\n          \"enum\": [\"MINUTE\", \"HOUR\", \"DAY\", \"WEEK\", \"MONTH\", \"QUARTER\", \"YEAR\"]\n        },\n        \"count\": {\n          \"type\": \"integer\",\n          \"minimum\": 1\n        }\n      },\n      \"required\": [\"time_unit\"]\n    },\n    \"range\": {\n      \"type\": \"object\",\n      \"oneOf\": [\n        {\n          \"properties\": {\n            \"first_bound_time\": {\n              \"type\": \"string\",\n              \"format\": \"date-time\"\n            },\n            \"second_bound_time\": {\n              \"type\": \"string\",\n              \"format\": \"date-time\"\n            }\n          },\n          \"required\": [\"first_bound_time\", \"second_bound_time\"]\n        },\n        {\n          \"properties\": {\n            \"first_bound_time\": {\n              \"type\": \"string\",\n              \"format\": \"date-time\"\n            },\n            \"duration\": {\n              \"type\": \"string\"\n            }\n          },\n          \"required\": [\"first_bound_time\", \"duration\"]\n        },\n        {\n          \"properties\": {\n            \"first_bound_time\": {\n              \"type\": \"string\",\n              \"format\": \"date-time\"\n            },\n            \"count\": {\n              \"type\": \"integer\"\n            }\n          },\n          \"required\": [\"first_bound_time\", \"count\"]\n        }\n      ]\n    },\n    \"properties\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\",\n        \"enum\": [\"OPEN\", \"HIGH\", \"LOW\", \"CLOSE\", \"VALUE\", \"VOLUME\", \"SESSION_TYPE\"]\n      }\n    },\n    \"session_types\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\",\n        \"enum\": [\"MAINSESSION\", \"PRE_MARKET\", \"POST_MARKET\"]\n      }\n    }\n  },\n  \"required\": [\"security_id\", \"time_frame\", \"range\"]\n}\n\n ```\n\n### Response Schema\n\n``` json\n{\n  \"type\": \"object\",\n  \"properties\": {\n    \"candles\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"time\": {\n            \"type\": \"string\",\n            \"format\": \"date-time\"\n          },\n          \"open\": {\n            \"$ref\": \"#/definitions/Decimal\"\n          },\n          \"high\": {\n            \"$ref\": \"#/definitions/Decimal\"\n          },\n          \"low\": {\n            \"$ref\": \"#/definitions/Decimal\"\n          },\n          \"close\": {\n            \"$ref\": \"#/definitions/Decimal\"\n          },\n          \"volume\": {\n            \"$ref\": \"#/definitions/Decimal\"\n          },\n          \"session_type\": {\n            \"type\": \"integer\",\n            \"enum\": [0, 1, 2]\n          }\n        },\n        \"required\": [\"time\"]\n      }\n    }\n  },\n  \"definitions\": {\n    \"Decimal\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"value\": {\n          \"type\": \"string\"\n        },\n        \"scale\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\"value\", \"scale\"]\n    }\n  }\n}\n\n ```\n\n---\n\n## Usage Recommendations\n\n- **Authorization**: Always use a valid `access_token` in the `accesstoken` header.\n    \n- **Error Handling**: Check the `status` field in the response to determine the success of the operation.\n    \n- **Time Zones**: All times are in UTC. Ensure your application handles time zones appropriately.\n    \n- **Data Interpretation**:\n    \n    - **Decimal Fields**: To calculate the real value of decimal fields, use `real_value = value / scale`. For example, if `value` is `\"21210\"` and `scale` is `\"100\"`, the real value is `21210 / 100 = 212.10`.\n        \n\n---\n\n## Frequently Asked Questions\n\n### How do I interpret the `Decimal` fields?\n\nThe `Decimal` fields use a `value` and `scale` to represent decimal numbers precisely. Compute the real value as `value / scale`.\n\n### What is the `session_type` field?\n\nThe `session_type` indicates the trading session:\n\n- `0`: MAINSESSION\n    \n- `1`: PRE_MARKET\n    \n- `2`: POST_MARKET\n    \n\n### Can I request candles for a custom time frame?\n\nYes, you can specify the `time_frame` with different `time_unit` and `count` values to create custom time frames, such as 5-minute or 15-minute candles.\n\n---\n\n## Additional Resources\n\n- [Auth API Documentation](#)\n    \n- [ISO 8601 Date Format](https://en.wikipedia.org/wiki/ISO_8601)",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "example": {
+                                    "security_id": {
+                                        "guid": "6ef11658-5a1c-4baf-9387-d977dcca6129"
+                                    },
+                                    "time_frame": {
+                                        "time_unit": "DAY",
+                                        "count": 1
+                                    },
+                                    "range": {
+                                        "count": -5,
+                                        "first_bound_time": "2024-08-16T00:00:00Z"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "accesstoken",
+                        "in": "header",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "JWT access token",
+                        "example": "YOUR_ACCESS_TOKEN_HERE"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "headers": {
+                            "content-type": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "application/json"
+                                }
+                            },
+                            "grpc-accept-encoding": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "identity, deflate, gzip"
+                                }
+                            },
+                            "x-envoy-upstream-service-time": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "10"
+                                }
+                            },
+                            "access-control-expose-headers": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "grpc-status, grpc-message, x-grpc-details, my-test"
+                                }
+                            },
+                            "my-little-header": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "my-test"
+                                }
+                            },
+                            "access-control-allow-origin": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "*"
+                                }
+                            },
+                            "grpc-status": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "0"
+                                }
+                            },
+                            "content-length": {
+                                "schema": {
+                                    "type": "integer",
+                                    "example": "1860"
+                                }
+                            },
+                            "date": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "Wed, 06 Nov 2024 06:57:20 GMT"
+                                }
+                            },
+                            "server": {
+                                "schema": {
+                                    "type": "string",
+                                    "example": "envoy"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "candles": [
+                                        {
+                                            "time": "2024-08-09T00:00:00Z",
+                                            "open": {
+                                                "value": "21210",
+                                                "scale": "100"
+                                            },
+                                            "high": {
+                                                "value": "21678",
+                                                "scale": "100"
+                                            },
+                                            "low": {
+                                                "value": "21197",
+                                                "scale": "100"
+                                            },
+                                            "close": {
+                                                "value": "21624",
+                                                "scale": "100"
+                                            },
+                                            "volume": {
+                                                "value": "42201600",
+                                                "scale": "1"
+                                            },
+                                            "session_type": 0
+                                        },
+                                        {
+                                            "time": "2024-08-12T00:00:00Z",
+                                            "open": {
+                                                "value": "21607",
+                                                "scale": "100"
+                                            },
+                                            "high": {
+                                                "value": "21951",
+                                                "scale": "100"
+                                            },
+                                            "low": {
+                                                "value": "21560",
+                                                "scale": "100"
+                                            },
+                                            "close": {
+                                                "value": "21753",
+                                                "scale": "100"
+                                            },
+                                            "volume": {
+                                                "value": "38028100",
+                                                "scale": "1"
+                                            },
+                                            "session_type": 0
+                                        },
+                                        {
+                                            "time": "2024-08-13T00:00:00Z",
+                                            "open": {
+                                                "value": "21901",
+                                                "scale": "100"
+                                            },
+                                            "high": {
+                                                "value": "22189",
+                                                "scale": "100"
+                                            },
+                                            "low": {
+                                                "value": "21901",
+                                                "scale": "100"
+                                            },
+                                            "close": {
+                                                "value": "22127",
+                                                "scale": "100"
+                                            },
+                                            "volume": {
+                                                "value": "44155300",
+                                                "scale": "1"
+                                            },
+                                            "session_type": 0
+                                        },
+                                        {
+                                            "time": "2024-08-14T00:00:00Z",
+                                            "open": {
+                                                "value": "22057",
+                                                "scale": "100"
+                                            },
+                                            "high": {
+                                                "value": "22303",
+                                                "scale": "100"
+                                            },
+                                            "low": {
+                                                "value": "21970",
+                                                "scale": "100"
+                                            },
+                                            "close": {
+                                                "value": "22172",
+                                                "scale": "100"
+                                            },
+                                            "volume": {
+                                                "value": "41960600",
+                                                "scale": "1"
+                                            },
+                                            "session_type": 0
+                                        },
+                                        {
+                                            "time": "2024-08-15T00:00:00Z",
+                                            "open": {
+                                                "value": "22460",
+                                                "scale": "100"
+                                            },
+                                            "high": {
+                                                "value": "22535",
+                                                "scale": "100"
+                                            },
+                                            "low": {
+                                                "value": "22276",
+                                                "scale": "100"
+                                            },
+                                            "close": {
+                                                "value": "22472",
+                                                "scale": "100"
+                                            },
+                                            "volume": {
+                                                "value": "46414000",
+                                                "scale": "1"
+                                            },
+                                            "session_type": 0
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

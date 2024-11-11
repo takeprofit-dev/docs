@@ -1,0 +1,31 @@
+{
+    "folders": {
+        "concat": false
+    },
+    "replaceVars": true,
+    "additionalVars": {
+        "PARTNER_API_URL": "api.dev.tpinf.in",
+        "PARTNER_ACCESS_TOKEN": "YOUR_ACCESS_TOKEN_HERE"
+    },
+    "outputFormat": "json",
+    "servers": [
+        {
+            "url": "https://api.dev.tpinf.in",
+            "description": "Development environment"
+        },
+        {
+            "url": "https://api.takeprofit.com",
+            "description": "'Production environment'"
+        }
+    ],
+    "auth": {
+        "type": "http",
+        "in": "header",
+        "name": "accesstoken"
+    },
+    "info": {
+        "title": "TakeProfit Partner API",
+        "description": "TakeProfit Partner API documentation",
+        "version": "0.1-beta"
+    }
+}

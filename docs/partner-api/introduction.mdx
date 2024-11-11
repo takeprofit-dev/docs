@@ -1,0 +1,218 @@
+---
+title: Introduction
+description: Overview of the TakeProfit Partner APIs and how they can be used to access financial data, security information, manage security links and more.
+---
+
+Whether you're a developer looking to retrieve market data or manage your own securities, this documentation will help you get started quickly.
+
+## Overview
+
+The TakeProfit APIs provide partners with financial data and integration tools. Our APIs include:
+
+<CardGroup cols={3}>
+	<Card
+		title="Security Linking"
+		icon="link"
+		href="/docs/partner-api/link"
+	>
+		Manage the linkage between your own securities and those provided by
+		TakeProfit.
+	</Card>
+	<Card
+		title="Reference Data"
+		icon="book-atlas"
+		href="/docs/partner-api/reference-api"
+	>
+		Retrieve detailed information on financial instruments, exchanges, and other
+		entities.
+	</Card>
+	<Card
+		title="Market Data"
+		icon="chart-candlestick"
+		href="/docs/partner-api/marketdata-api"
+	>
+		Access real-time and historical market data across various asset classes.
+	</Card>
+</CardGroup>
+
+This suite ensures seamless access to essential data and simplifies integration with partner systems.
+
+## High-Level Workflow
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+    'primaryColor': '#2A2D34',
+    'primaryBorderColor': '#3D4148',
+    'primaryTextColor': '#E1E1E6',
+    'nodeBorderRadius': '12px',
+    'clusterBorderRadius': '12px',
+    'fontFamily': 'Inter, sans-serif',
+    'padding': '20px',
+    'edgeLabelBackground': '#2A2D34',
+    'tertiaryColor': '#1F2227',
+    'lineWidth': '16px',
+    'nodeSpacing': '20px',
+    'linkColor': '#6C757D',
+    'lineColor': '#6C757D'
+}}}%%
+flowchart TB
+    classDef diagramCenter fill:#2A2D34,stroke:#3D4148,stroke-width:3px,rx:16px,ry:16px,color:#E1E1E6,padding:16px;
+
+    subgraph TP_API[" "]
+        class TP_API diagramCenter;
+        ReferenceAPI[Reference API]
+        MarketDataAPI[MarketData API]
+        SecurityLinkAPI[Security Link API]
+        PartnerAuth[Credentials API]
+    end
+
+    PartnerApp[Partner Backend Services]
+
+    class PartnerApp diagramCenter;
+
+    PartnerApp -- "Create / Refresh Token" --> PartnerAuth
+    PartnerApp -- "Token" --> SecurityLinkAPI
+    PartnerApp -- "Token" --> MarketDataAPI
+    PartnerApp -- "Token" --> ReferenceAPI
+```
+
+## Workflow Example
+
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': {
+    'primaryColor': '#2A2D34',
+    'primaryBorderColor': '#3D4148',
+    'primaryTextColor': '#E1E1E6',
+    'nodeBorderRadius': '12px',
+    'clusterBorderRadius': '12px',
+    'fontFamily': 'Inter, sans-serif',
+    'padding': '20px',
+    'edgeLabelBackground': '#2A2D34',
+    'tertiaryColor': '#1F2227',
+    'lineWidth': '16px',
+    'nodeSpacing': '20px',
+    'linkColor': '#6C757D',
+    'lineColor': '#6C757D'
+}}}%%
+sequenceDiagram
+    participant PartnerApp as Partner Backend
+    participant AuthAPI as Credentials API
+    participant SecurityAPI as SecurityInfo API
+    participant CandleAPI as CandleHistory API
+    participant LinkAPI as Link API
+
+    Note over PartnerApp,AuthAPI: Authentication Process
+    PartnerApp->>AuthAPI: POST Create Token (api_key)
+    AuthAPI-->>PartnerApp: access_token, refresh_token
+
+    Note over PartnerApp,SecurityAPI: Retrieve Security Information
+    PartnerApp->>SecurityAPI: POST /ListSecurities (access_token)
+    SecurityAPI-->>PartnerApp: Security Data
+
+    Note over PartnerApp,CandleAPI: Retrieve Candle Data
+    PartnerApp->>CandleAPI: POST /ListCandles (access_token)
+    CandleAPI-->>PartnerApp: Candle Data
+
+    Note over PartnerApp,LinkAPI: Manage Security Links
+    PartnerApp->>LinkAPI: POST /LinkSecurity (access_token)
+    LinkAPI-->>PartnerApp: Status
+```
+
+---
+
+## Credentials API
+
+The **Credentials API** is your entry point. It allows you to authenticate and receive tokens for accessing other APIs securely.
+
+### Usage Flow
+
+1. **Create Token**: Send your `api_key` to receive tokens.
+2. **Refresh Token**: Use the `refresh_token` to obtain a new `access_token` when needed.
+
+> **Note:** The lifetime of the `access_token` is 30 minutes.
+
+### Example: Logging In
+
+```bash
+curl --location 'https://{{PARTNER_API_URL}}/takeprofit.partner.external.auth.v1.AuthApi.Login' \
+--header 'Content-Type: application/json' \
+--data '{
+    "api_key": "YOUR_API_KEY_HERE"
+}'
+```
+
+**Response**
+
+```json
+{
+	"status": {
+		"code": 0,
+		"message": "",
+		"details": []
+	},
+	"access_token": {
+		"token": "ACCESS_TOKEN",
+		"valid_to_time": "2024-10-30T12:57:25Z"
+	},
+	"refresh_token": {
+		"token": "REFRESH_TOKEN",
+		"valid_to_time": "2024-10-30T14:27:25Z"
+	}
+}
+```
+
+> **Note:** Keep your tokens secure and never expose them publicly.
+
+---
+
+## Best Practices
+
+### Secure Storage
+
+- **Protect Credentials**: Store your `api_key`, `access_token`, and `refresh_token` securely.
+- **Avoid Exposure**: Do not expose tokens in client-side code or public repositories.
+
+### Token Management
+
+- **Monitor Expiration**: Keep track of token `valid_to_time` to refresh tokens proactively. Token lifetime is 30 minutes.
+- **Handle Failures**: Implement retry logic for token refresh failures.
+
+### Error Handling
+
+- **Check Status Codes**: Always check the `status.code` in responses.
+- **Log Errors**: Log error messages for troubleshooting, but avoid logging sensitive information.
+
+### Rate Limiting
+
+- **Be Mindful**: Respect any rate limits to avoid service interruptions.
+- **Implement Backoff**: Use exponential backoff strategies when retrying requests.
+
+---
+
+## FAQs
+
+### How do I obtain an `api_key`?
+
+Contact our sales team at [support@takeprofit.com](mailto:support@takeprofit.com) to obtain your unique `api_key`.
+
+### What should I do if my `access_token` expires?
+
+Use the `refresh_token` with the Auth API's `Refresh` method to obtain a new `access_token`.
+
+**Example: Refreshing Token**
+
+```bash
+curl --location 'https://api.dev.tpinf.in/takeprofit.partner.external.auth.v1.AuthApi.Refresh' \
+--header 'Content-Type: application/json' \
+--data '{
+    "refresh_token": "YOUR_REFRESH_TOKEN_HERE"
+}'
+```
+
+### Are all times in UTC?
+
+Yes, all times provided by the APIs are in UTC.
+
+## Feedback
+
+We value your feedback! If you have suggestions or find any issues, please let us know at [support@takeprofit.com](mailto:support@takeprofit.com).

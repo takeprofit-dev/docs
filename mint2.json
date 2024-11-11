@@ -32,6 +32,10 @@
       "name": "Partner API",
       "url": "/docs/partner-api",
       "openapi": "/docs/partner-api/openapi.json"
+    },
+    {
+      "name": "Indie Language",
+      "url": "/docs/indie"
     }
   ],
   "anchors": [
@@ -72,6 +76,38 @@
       "group": "Reference",
       "pages": [
         "/docs/sdk/reference"
+      ]
+    },
+    {
+      "group": "Introduction",
+      "pages": [
+        "/docs/indie/what-is-Indie",
+        "/docs/indie/language-differences-with-Python"
+      ]
+    },
+    {
+      "group": "Getting Started",
+      "pages": [
+        "/docs/indie/quick-start",
+        "/docs/indie/indicator-code-structure",
+        "/docs/indie/data-types-in-Indie",
+        "/docs/indie/how-Indies-syntactic-sugar-works"
+      ]
+    },
+    {
+      "group": "Indicator Development",
+      "pages": [
+        "/docs/indie/algorithms-for-series-processing",
+        "/docs/indie/input-parameters",
+        "/docs/indie/fills-levels-and-bands",
+        "/docs/indie/request-additional-instruments"
+      ]
+    },
+    {
+      "group": "Additional",
+      "pages": [
+        "/docs/indie/library-reference",
+        "/docs/indie/changelog"
       ]
     },
     {
