@@ -78,11 +78,11 @@
                                                 "details": []
                                             },
                                             "access_token": {
-                                                "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InR5cGUiOiJwYXJ0bmVyIn0sInBhcnRuZXIiOnsiY29kZSI6ImxpbWUifSwiaWF0IjoxNzMwMjkxMjQ1LCJleHAiOjE3MzAyOTMwNDV9.ClSI-DnXeWh3sVxc4HU8HBP4Y6GTho-I1G5WL_FK9qA2VTWzX0H220GGgLwaC2U8qK2RRMcgpGpnPBYtCU3VSA45G3ahut4QUDBI8H2m-VCy1V1OTERGFaMcV8YWr0CLwzWVcPVaxIIUy1f7fhsVYGMyztcAhF4VzNpdzyuMy9-vwztkL2DuZzvyDWkq8-ncPwP844dwiFIVGan6kBmR_r7zKchXT7Y7diqjQdm6wrYc4vM1daxDRKVDNDA1uQfvJjnoXQ5bLgVYjYAjzMyDGU0WLfVzcMCvb2IwLtWra1Jp19I5yLM5p5t3s_mZMn5UDdMaD9rYN9h6RH3iZXt8p-3aLEBXf-8FSYVS6qzze0ylqzqm9Z23V5mzzCrqvRWWjpEG7eZUq8uh6Te-kCX3XPgn9ZPPmYDup2cuF7Jw3VGI_Dr7NtG5p4pWk7ehuu9juutYIdfS3GhrC8LLriidg4gfL58Ep5L023EttM0KrIudGhBR4K2Glc2YVlnkyCXOe3JQngCLS6fMxZITvOa86_eDFkUkFEvJUCWntR3fq3qDuAwUgrAFwbdXRvRKi6f1hWoZvM1w2bIqRxaJZfcAbJ9EMIc5NmXuYvHlQDbqJsloqMZSqrzjJlXIzuBuh0_mI5NsLKT7-H7mjxiMDIGxIaelJwPXUq54TCMB61X38ws",
+                                                "token": "VALID_ACCESS_TOKEN",
                                                 "valid_to_time": "2024-10-30T12:57:25Z"
                                             },
                                             "refresh_token": {
-                                                "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoIjp0cnVlLCJkYXRhIjp7InVzZXIiOnsidHlwZSI6InBhcnRuZXIifSwicGFydG5lciI6eyJjb2RlIjoibGltZSJ9fSwiaWF0IjoxNzMwMjkxMjQ1LCJleHAiOjE3MzAyOTg0NDV9.aRNVSPXnVZXDeA8kqUJO6yG3eJlzJGYsYYyJvrl7eVDN1Nep_ODwldeG360t-CZ4_LEC0t-L8b3PJ_mIteurm6WByvWDwydtoLbEq7Mku0HkjErCTFPr9gVn804UCfquu8CApBkXh0n-u7IVA6cH0PWlanKpcJRFDt4AnIBFJ-ofilN_-1DjG_v8Cos-qfDk89fASrfQtr5SP0wq2IwIS_TyJWZj48VAZoOLM65erBa-Aiiz0-bnol83gDeLYXBM6FMJkQPDhqs7uJuUA-0vGOCouBlIDvaEAmyPDFKmmFcrziAs4p8QidaTXK8x2ZJAvqNSqijknAF5ZR0amEaKVMtSoyEvx001tV9XlfQJBDlcjGVCr6d8hfiaRxB2Z7Anrsh_1c64vvBuQXxFg3Ho-fSB05hwBoq_wOYbAPBsMSBYqK43u2eeqW_DUstd8osMEymtkYNfWLCPbPtaUb9bLuZUOZGVUC8HKYA-A33wnPxPlSHzghAsDqhsz79thjIUkPZyZCSGmCUYoSc4wDDCA29JQEbLiDDLwSoEvVx5iHJqd9gsUQD2RK0DJnR97VHv1Bj5rN2oJZVRojNy-ha-qV7wVVbtsi_Dbulvu7pfc7xk7q8s-tl4l6LbH0so42mvX9jtAvmW-SOIx0C19ce0yR_5BQ7O0jLJ1u2E_nvOFAU",
+                                                "token": "VALID_REFRESH_TOKEN",
                                                 "valid_to_time": "2024-10-30T14:27:25Z"
                                             }
                                         }
@@ -117,7 +117,7 @@
                             "schema": {
                                 "type": "object",
                                 "example": {
-                                    "refresh_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZWZyZXNoIjp0cnVlLCJkYXRhIjp7InVzZXIiOnsidHlwZSI6InBhcnRuZXIifSwicGFydG5lciI6eyJjb2RlIjoibGltZSJ9fSwiaWF0IjoxNzMwMjkxMjQ1LCJleHAiOjE3MzAyOTg0NDV9.aRNVSPXnVZXDeA8kqUJO6yG3eJlzJGYsYYyJvrl7eVDN1Nep_ODwldeG360t-CZ4_LEC0t-L8b3PJ_mIteurm6WByvWDwydtoLbEq7Mku0HkjErCTFPr9gVn804UCfquu8CApBkXh0n-u7IVA6cH0PWlanKpcJRFDt4AnIBFJ-ofilN_-1DjG_v8Cos-qfDk89fASrfQtr5SP0wq2IwIS_TyJWZj48VAZoOLM65erBa-Aiiz0-bnol83gDeLYXBM6FMJkQPDhqs7uJuUA-0vGOCouBlIDvaEAmyPDFKmmFcrziAs4p8QidaTXK8x2ZJAvqNSqijknAF5ZR0amEaKVMtSoyEvx001tV9XlfQJBDlcjGVCr6d8hfiaRxB2Z7Anrsh_1c64vvBuQXxFg3Ho-fSB05hwBoq_wOYbAPBsMSBYqK43u2eeqW_DUstd8osMEymtkYNfWLCPbPtaUb9bLuZUOZGVUC8HKYA-A33wnPxPlSHzghAsDqhsz79thjIUkPZyZCSGmCUYoSc4wDDCA29JQEbLiDDLwSoEvVx5iHJqd9gsUQD2RK0DJnR97VHv1Bj5rN2oJZVRojNy-ha-qV7wVVbtsi_Dbulvu7pfc7xk7q8s-tl4l6LbH0so42mvX9jtAvmW-SOIx0C19ce0yR_5BQ7O0jLJ1u2E_nvOFAU"
+                                    "refresh_token": "YOUR_REFRESH_TOKEN_HERE"
                                 }
                             }
                         }
@@ -212,7 +212,7 @@
                                         "details": []
                                     },
                                     "access_token": {
-                                        "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7InR5cGUiOiJwYXJ0bmVyIn0sInBhcnRuZXIiOnsiY29kZSI6ImxpbWUifSwiaWF0IjoxNzMwMjkxMjY1LCJleHAiOjE3MzIwOTEyNjV9.VRdxR-n3gIoL4vvnejJodOp8Idy4w-KUaP6tfSZZcHaoxLHbD6juGQfx2X57Gm08i1doUb4b3hJ0MNqGjIhzinPpOxYXmr860yT54ikScSrx00RHI0OPIWAEzi9wMnUAN_kA4J7CLWDiK7yslcxSuTHIRow-pvUDHvMyWPX33oaMpMwXllbX3jGOCqeI51ETldK9qSJBgRldFm_iM6bvHgtE1Fh3d36NqK2KJKZSdwO-4F1kZD0NpJ-t5opMUSPoWdy7vqfLfw9c2SZorr2xiiLyoPuL_89cwgYPccM9sXCzJpK4sa_4jC3UjmGHdHz7xcrG40KML8gMawbXgFerI8pZ4hXyUUnfsXlcIxWJO-nW7A-HP2xw6iu0JGa1NyYsyy-MclwKtSq-gY2h6gp9wRtc0ipwxQNGx3bnAVCwiaFqMoRigVOLu6KDWlRNjHUaq7geDpT1BqEBIzsPwIt3Qe_M0XXjlaUWU9UIfbFtHTgfx3UDyj2TbL_1hqC2704fcHWgiZe3xJDuc431AvSVO1FmKSoUDmU6neTzjQOovR4yDw9nDT3vPMKh2om0p-vRs5Qu4Sa-d0iUSQRUsTwepVHQeD1Xz180kvokelzZBb_0CP7Rqae8ZN5Ic5sbChnYNOhouPQ3mvsk5X6Fghp6Hj3t1thnmMA-2S7ceWqIhxs",
+                                        "token": "VALID_ACCESS_TOKEN",
                                         "valid_to_time": "2024-10-30T12:57:45Z"
                                     }
                                 }
