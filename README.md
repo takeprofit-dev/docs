@@ -10,6 +10,11 @@ Run the following command at the root of your documentation (where mint.json is)
 mintlify dev
 ```
 
+```bash
+npx @mintlify/scraping@latest openapi-file ./docs/partner-api/openapi.json -o ./docs/partner-api
+
+```
+
 Postman to OpenAPI
 
 ```bash
