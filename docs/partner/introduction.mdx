@@ -207,7 +207,7 @@ Use the `refresh_token` with the Auth API's `Refresh` method to obtain a new `ac
 **Example: Refreshing Token**
 
 ```bash
-curl --location 'https://api.dev.tpinf.in/takeprofit.partner.external.auth.v1.AuthApi.Refresh' \
+curl --location 'https://{{PARTNER_API_URL}}/takeprofit.partner.external.auth.v1.AuthApi.Refresh' \
 --header 'Content-Type: application/json' \
 --data '{
     "refresh_token": "YOUR_REFRESH_TOKEN_HERE"
