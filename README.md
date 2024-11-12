@@ -11,7 +11,7 @@ mintlify dev
 ```
 
 ```bash
-npx @mintlify/scraping@latest openapi-file ./docs/partner-api/openapi.json -o ./docs/partner-api
+npx @mintlify/scraping@latest openapi-file ./docs/partner/openapi.json -o ./docs/partner/
 
 ```
 
@@ -22,7 +22,7 @@ npm i -g postman-to-openapi@3.0.1
 ```
 
 ```bash
-p2o ./docs/partner-api/postman.json -f ./docs/partner-api/openapi.json -o ./docs/partner-api/p2o.options.json
+p2o ./docs/partner/postman.json -f ./docs/partner/openapi.json -o ./docs/partner/p2o.options.json
 ```
 
 Generate clients

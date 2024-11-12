@@ -30,8 +30,8 @@
     },
     {
       "name": "Partner API",
-      "url": "/docs/partner-api",
-      "openapi": "/docs/partner-api/openapi.json"
+      "url": "/docs/partner",
+      "openapi": "/docs/partner/openapi.json"
     },
     {
       "name": "Indie Language",
@@ -113,7 +113,7 @@
     {
       "group": "Getting Started",
       "pages": [
-        "/docs/partner-api/introduction"
+        "/docs/partner/introduction"
       ]
     }
   ],
