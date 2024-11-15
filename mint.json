@@ -6,22 +6,26 @@
     "style": "gradient"
   },
   "logo": {
-    "dark": "/favicon.svg",
-    "light": "/favicon.svg"
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
   },
   "favicon": "/favicon.svg",
   "colors": {
     "primary": "#6100D2",
     "light": "#916BFF",
-    "dark": "#38007F",
+    "dark": "#6100D2",
     "anchors": {
       "from": "#7700FF",
       "to": "#7700FF"
     }
   },
+  "background": {
+    "style": "gradient"
+  },
   "topbarCtaButton": {
     "name": "Platform",
-    "url": "https://takeprofit.com/platform"
+    "url": "https://takeprofit.com/platform",
+    "style": "roundedRectangle"
   },
   "tabs": [
     {
